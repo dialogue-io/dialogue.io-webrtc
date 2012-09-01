@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>WebRTC Multichat</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="/dist/RTClibrary.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+	<script>
+		var socket = io.connect('http://10.0.0.253:8080');
+		var me;
+		var Meeting = new Array();
+		var index = {};
+		var counter = 0;
+		// on connection to server, ask for user's name with an anonymous callback
+		socket.on('connect', function(){
+			// call the server-side function 'adduser' and send one parameter (value of prompt)
+			socket.emit('adduser', me = prompt("What's your name?"));
+			console.log("I am "+me);
+		});
+	
+		// listener, whenever the server emits 'updatechat', this updates the chat body
+		socket.on('updatechat', function (username, data) {
+			$('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+		});
+		
+		//Listener for incomming signaling messages
+		socket.on('onSignaling', function (message) {
+			if ((Meeting[message.from] == undefined) || (Meeting[message.from] == null)) {
+				console.log("Starting call with "+message.from);
+				Meeting[message.from] = new Conference();
+		  		Meeting[message.from].setLocalVideo("localVideo",function(status){
+		  			if (status == true){
+		  				Meeting[message.from].Answer(message.from,"webcam", function(status){
+		  					if(status==true){
+		  						addHangButton(message.from);
+		  						Meeting[message.from].onChannelMessage(message);
+		  					} else {
+		  						console.log("Error answering call");
+		  					}
+		  				});
+		  			} else { 
+		  				console.log("Error");
+		  			}
+		  		});
+				counter = counter+1;
+			} else if(Meeting[message.from]){
+				Meeting[message.from].onChannelMessage(message);
+			} else {
+				console.log("Unexpected error");
+			}
+		});
+	
+		// listener, whenever the server emits 'updateusers', this updates the username list
+		socket.on('updateusers', function(data) {
+			$('#users').empty();
+			$.each(data, function(key, value) {
+				if (key == me) {
+					$('#users').append('<div id="'+key+'">' + key + ' (me)</div>');
+				} else {
+					$('#users').append('<div id="'+key+'">' + key + '</div>');
+					$('#'+key).attr('onclick','start("'+key+'")');
+				}
+			});
+		});
+	
+		// on load of page
+		$(function(){
+			// when the client clicks SEND
+			$('#datasend').click( function() {
+				var message = $('#data').val();
+				$('#data').val('');
+				// tell server to execute 'sendchat' and send along one parameter
+				socket.emit('sendchat', message);
+			});
+	
+			// when the client hits ENTER on their keyboard
+			$('#data').keypress(function(e) {
+				if(e.which == 13) {
+					$(this).blur();
+					$('#datasend').focus().click();
+				}
+			});
+		});
+	
+	</script>
+  </head>
+  <body>
+	<div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+		<b>USERS</b>
+		<div id="users"></div>
+	</div>
+	<div style="float:left;width:300px;height:400px;overflow:scroll-y;padding:10px;">
+		<div id="conversation"></div>
+		<input id="data" style="width:200px;" />
+		<input type="button" id="datasend" value="send" />
+	</div>
+	<div >
+		<div id="footer" style="text-align: center;"></div>
+		<div>
+			<video id="localVideo" width = 320px; height = 240px; autoplay></video>
+			<div id="webcam"></div>
+		</div>
+	</div > 
+	<div id="buttons">
+	</div> 
+	
+	
+	<script>
+  	
+  	function start(id) {
+		if ((Meeting[id] == undefined) || (Meeting[id] == null)) {
+			console.log("Starting call to "+id);
+			Meeting[id] = new Conference();
+	  		Meeting[id].setLocalVideo("localVideo",function(status){
+	  			if (status == true){
+	  				Meeting[id].Call(id,"webcam",function(status){
+	  					if (status==false){
+	  						alert("Call error!");
+	  					} else {
+	  						addHangButton(id);
+	  					}
+	  				});
+	  			} else { 
+	  				console.log("Error");
+	  			}
+	  		});
+  		}
+  	}
+  
+	function addHangButton(id){
+		//$('#'+id).attr('onclick','');
+		_elem = "<input type=\"button\" id=\"hangup"+id+"\" value=\""+id+" (Hang up)\" onclick=\"Meeting['"+id+"'].onHangup()\" />"
+		$('#buttons').append(_elem);
+	}
+	
+	</script>
+</body>
+</html>

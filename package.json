@@ -1,0 +1,9 @@
+{
+     "name": "Peerconn1",
+     "description": "PeerConn test with websockets",
+     "version": "0.0.1",
+     "dependencies": {
+        "express": "2.5.1",
+        "socket.io": "0.9.6"
+     }
+}

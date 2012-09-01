@@ -1,12 +1,10 @@
 dialogue.io-webrtc
 ==================
 
-building a webrtc
-
 Procedure for running this demo in Node.js
 
-
 Server (Ubuntu):  
+
 1. install node.js by running (one per time)
  * sudo apt-get install python-software-properties
  * sudo add-apt-repository ppa:chris-lea/node.js

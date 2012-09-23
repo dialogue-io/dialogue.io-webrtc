@@ -2,59 +2,98 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 var express = require('express');
-
+//test comment
 var app = require('express').createServer();
 var io = require('socket.io').listen(app);
-app.use("/dist", express.static(__dirname + '/dist'));
-
+app.use("/js", express.static(__dirname + '/js'));
+app.use("/css", express.static(__dirname + '/css'));
+app.use("/img", express.static(__dirname + '/img'));
+app.use("/logs", express.static(__dirname + '/logs'));
+//listen to any connection in 8080
 app.listen(8080);
 var clientID = 1;
 // routing
 app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
-    fs.writeFile("log"+date, "Logfile", function(err) {
-      if(err) {
-         console.log(err);
-      } else {
-          console.log("The file was saved!");
-      }
-    });
-var date;
+
+//Builds a new logfile every 24hours
+var date = "";
 var cronJob = require('cron').CronJob;
-var job = new cronJob('00 01 00 * * 1-7', function(){
+var job = new cronJob({
+  cronTime: '00 01 00 * * 1-7',
+  onTick: function() {
     // Runs every weekday
     date = new Date();
-    fs.writeFile("log"+date, "Logfile", function(err) {
+    fs.writeFile("logs/log"+date, "Logfile for "+date+"\n", function(err) {
       if(err) {
          console.log(err);
       } else {
-          console.log("The file was saved!");
+          console.log("New logfile was saved!");
       }
     });
-  }, function () {
-    // This function is executed when the job stops
-  }, 
-  true /* Start the job right now */,
-  timeZone /* Time zone of this job. */
-);
+  },
+  start: false,
+  timeZone: "Europe/Helsinki"
+});
+job.start();
 
-// usernames which are currently connected to the chat
+//Recursive system to list the amount of logfiles in the directory
+var walk = function(dir, done) {
+  var results = [];
+  fs.readdir(dir, function(err, list) {
+    if (err) return done(err);
+    var pending = list.length;
+    if (!pending) return done(null, results);
+    list.forEach(function(file) {
+      //file = dir + '/' + file;
+      file = file;
+      fs.stat(file, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+          walk(file, function(err, res) {
+            results = results.concat(res);
+            if (!--pending) done(null, results);
+          });
+        } else {
+          results.push(file);
+          if (!--pending) done(null, results);
+        }
+      });
+    });
+  });
+};
+
 var usernames = {};
 var sockets = {};
 var ids = {};
 io.sockets.on('connection', function (socket) {
 	
-	//sockets[socket.id]=socket;
+	walk(process.cwd()+"/logs", function(err, results) {
+	  if (err) throw err;
+	  io.sockets.emit('logfiles', results);
+	});
+	
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function (data) {
 		// we tell the client to execute 'updatechat' with 2 parameters
 		io.sockets.emit('updatechat', socket.username, data);
-		var log = fs.createWriteStream('log'+date, {'flags': 'a'});
+		var log = fs.createWriteStream('logs/log'+date, {'flags': 'a'});
 		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
-	        log.write(socket.username+":"+data);
+	        log.write("- "+socket.username+": "+data+"\n");
 	});
-	
+
+	//Sending files to all users
+	socket.on('file', function (data) {
+		// we tell the client to execute 'updatechat' with 2 parameters
+		io.sockets.emit('file', socket.username, data);
+	});
+
+	//Sending images
+	socket.on('image', function (data) {
+		// we tell the client to execute 'updatechat' with 2 parameters
+		io.sockets.emit('image', socket.username, data);
+	});
+		
 	//Handling signalling messages
 	socket.on('signaling', function (message) {
 		// we tell the client to execute 'updatechat' with 2 parameters
@@ -76,12 +115,15 @@ io.sockets.on('connection', function (socket) {
 		//sockets[username] = socket;
 		ids[username] = socket.id;
 		// echo to client they've connected
-		socket.emit('updatechat', 'SERVER', 'you have connected');
+		socket.emit('updatechat', 'BOT', 'you have connected');
 		// echo globally (all clients) that a person has connected
-		socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
+		socket.broadcast.emit('updatechat', 'BOT', username + ' has connected');
 		// update the list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
 		//console.log(sockets);
+		var log = fs.createWriteStream('logs/log'+date, {'flags': 'a'});
+		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
+	        log.write("BOT : "+username+" has connected\n");
 	});
 
 	// when the user disconnects.. perform this
@@ -91,6 +133,7 @@ io.sockets.on('connection', function (socket) {
 		// update list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
-		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+		socket.broadcast.emit('disconnect',socket.username);
+		socket.broadcast.emit('updatechat', 'BOT', socket.username + ' has disconnected');
 	});
 });

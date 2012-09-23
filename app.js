@@ -13,6 +13,31 @@ var clientID = 1;
 app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
+    fs.writeFile("log"+date, "Logfile", function(err) {
+      if(err) {
+         console.log(err);
+      } else {
+          console.log("The file was saved!");
+      }
+    });
+var date;
+var cronJob = require('cron').CronJob;
+var job = new cronJob('00 01 00 * * 1-7', function(){
+    // Runs every weekday
+    date = new Date();
+    fs.writeFile("log"+date, "Logfile", function(err) {
+      if(err) {
+         console.log(err);
+      } else {
+          console.log("The file was saved!");
+      }
+    });
+  }, function () {
+    // This function is executed when the job stops
+  }, 
+  true /* Start the job right now */,
+  timeZone /* Time zone of this job. */
+);
 
 // usernames which are currently connected to the chat
 var usernames = {};
@@ -25,6 +50,9 @@ io.sockets.on('connection', function (socket) {
 	socket.on('sendchat', function (data) {
 		// we tell the client to execute 'updatechat' with 2 parameters
 		io.sockets.emit('updatechat', socket.username, data);
+		var log = fs.createWriteStream('log'+date, {'flags': 'a'});
+		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
+	        log.write(socket.username+":"+data);
 	});
 	
 	//Handling signalling messages

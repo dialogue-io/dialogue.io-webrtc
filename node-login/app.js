@@ -147,6 +147,6 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
 		socket.broadcast.emit('disconnect',socket.username);
-		socket.broadcast.emit('updatechat', 'BOT', socket.username + ' has disconnected');
+		socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
 	});
 });

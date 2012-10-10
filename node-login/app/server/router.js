@@ -146,13 +146,19 @@ module.exports = function(app) {
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
 	    }   else{
-		res.render('room_nmps', {
-			locals: {
-				title : 'NMPS Room - dialogue.io',
-				countries : CT,
-				udata : req.session.user
-			}
-		});
+		//Checks email address, if aalto.fi is inside allows access to NMPS room
+		//console.log(req.session.user.email.split('@')[1]);
+		if (req.session.user.email.split('@')[1] == 'aalto.fi') {
+			res.render('room_nmps', {
+				locals: {
+					title : 'NMPS Room - dialogue.io',
+					countries : CT,
+					udata : req.session.user
+				}
+			});
+		} else {
+			res.redirect('/');
+		}
 	    }
 	});
 	
@@ -169,7 +175,7 @@ module.exports = function(app) {
 	      AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
 		 if (o != null){
 		    req.session.user = o;
-		    res.redirect('/room_nmps');
+		    res.redirect('/rooms/nmps');
 		 }  else{
 		    res.render('login', 
 		       { locals: 

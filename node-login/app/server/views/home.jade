@@ -7,11 +7,10 @@ input(type='hidden', value= user.date)#userCreated
 input(type='hidden', value= user.country)#userCountry
 input(type='hidden', value= user.user)#userUserName
 input(type='hidden', value= user.email)#userEmail
-
+script(type='text/javascript',src='https://maps.googleapis.com/maps/api/js?sensor=false')
 script(type='text/javascript')
     //console.log(userRId);
     //console.log(user.name);
-    mixpanel.track('Home visit', {'page name' : document.title, 'url' : window.location.pathname, 'usr' : userName.value});
     mixpanel.track_pageview("/home.html");
     mixpanel.identify(userId.value);
     mixpanel.people.identify(userId.value);
@@ -22,6 +21,7 @@ script(type='text/javascript')
             "$email": userEmail.value,
             "$last_login": new Date(),         // properties can be dates...
     });
+
 div.navbar.navbar-fixed-top
     div.navbar-inner
         div.container-fluid

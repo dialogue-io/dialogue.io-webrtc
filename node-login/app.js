@@ -82,11 +82,16 @@ io.sockets.on('connection', function (socket) {
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function (data) {
 		date = new Date();
+		var hours = date.getHours()
+		var minutes = date.getMinutes()
+		if (minutes < 10){
+			minutes = "0" + minutes
+		}
 		// we tell the client to execute 'updatechat' with 2 parameters
-		io.sockets.emit('updatechat', socket.username, data);
+		io.sockets.emit('updatechat', socket.username.split('(')[0], data);
 		var log = fs.createWriteStream('logs/'+date.toDateString()+'.html', {'flags': 'a'});
 		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
-	        log.write("- <strong>"+socket.username+":</strong> "+data+"<br>\n");
+	        log.write("- <strong>"+socket.username.split('(')[0]+"["+hours+":"+minutes+"]:</strong> "+data+"<br>\n");
 	});
 
 	//Sending files to all users
@@ -123,9 +128,9 @@ io.sockets.on('connection', function (socket) {
 		//sockets[username] = socket;
 		ids[username] = socket.id;
 		// echo to client they've connected
-		socket.emit('updatechat', 'BOT', 'you have connected');
+		socket.emit('updatechat', '', 'you have connected');
 		// echo globally (all clients) that a person has connected
-		socket.broadcast.emit('updatechat', 'BOT', username + ' has connected');
+		socket.broadcast.emit('updatechat', '', username + ' has connected');
 		// update the list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
 		//console.log(sockets);

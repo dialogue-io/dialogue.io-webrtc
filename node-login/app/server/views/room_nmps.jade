@@ -7,6 +7,8 @@ input(type='hidden', value= user.date)#userCreated
 input(type='hidden', value= user.country)#userCountry
 input(type='hidden', value= user.user)#userUserName
 input(type='hidden', value= user.email)#userEmail
+script(type='text/javascript', src='/js/jquery.js')
+script(type='text/javascript', src='https://raw.github.com/heyman/jquery-titlealert/master/jquery.titlealert.js')
 script(type='text/javascript')
     //console.log(userRId);
     //console.log(user.name);
@@ -46,7 +48,6 @@ head
       box-shadow: inset 0 3px 4px #888;
       }
       #logfiles{}
-    script(type='text/javascript', src='/js/jquery.js')
     script(type='text/javascript', src='/socket.io/socket.io.js')
     script(type='text/javascript', src='/js/RTClibrary.js')
     script
@@ -60,7 +61,7 @@ head
       // call the server-side function 'adduser' and send one parameter (value of prompt)
       //getUserMedia(function(status) {
       //if (status == true){
-      me = userName.value
+      me = userName.value+' (@'+userUserName.value+')';
       socket.emit('adduser', me);
       console.log("I am "+me);
       $('#data').focus();
@@ -96,7 +97,19 @@ head
       });
       // listener, whenever the server emits 'updatechat', this updates the chat body
       socket.on('updatechat', function (username, data) {
-      $('#chat-body').append('<tr"><td style:"color: #A65500;"><strong>'+username+'</strong></td><td style:"color: #A65500;">'+data+'</td></tr>');
+        $.titleAlert("New chat message!", {
+            requireBlur:false,
+            stopOnFocus:true,
+            stopOnMouseMove:true,
+            interval:700
+        });
+        date = new Date();
+        var hours = date.getHours()
+        var minutes = date.getMinutes()
+        if (minutes < 10){
+        minutes = "0" + minutes
+        }
+      $('#chat-body').append('<tr"><td style:"color: #A65500;"><strong>'+username+'</strong> ['+hours+':'+minutes+']</td><td style:"color: #A65500;">'+data+'</td></tr>');
       $('#chat').scrollTop(9000);
       });
       //Listener for incomming signaling messages
@@ -131,9 +144,9 @@ head
       $('#users-body').empty();
       $.each(data, function(key, value) {
       if (key == me) {
-      $('#users-body').append('<tr><td id="'+key+'"><h4>'+key+' (me)</h3></td></tr>');
+      $('#users-body').append('<tr><td id="'+userName.value+'"><h4 style="font-size: 13px;">'+userName.value+' (me)</h4></td></tr>');
       } else {
-      $('#users-body').append('<tr><td id="'+key+'"><h4>'+key+'</h3></td></tr>');
+      $('#users-body').append('<tr><td id="'+key+'"><h4 style="font-size: 13px;">'+key+'</h4></td></tr>');
       $('#'+key).attr('onclick','start("'+key+'")');
       }
       });
@@ -158,6 +171,8 @@ head
             div.container-fluid
                 ul#global-nav.nav.pull-left
                     a(href='/home').brand dialogue.io
+                button#btn-settings.btn.btn
+                    | Settings
                 button#btn-logout.btn.btn-primary
                     i.icon-lock.icon-white
                     | Sign Out
@@ -425,7 +440,7 @@ head
       object.setAttribute("style","-webkit-transition: opacity 2s; -webkit-transform: scale(-1, 1); opacity: 1; margin-right: 3px; height:90%; border: 2px solid #6C7B84; padding:1px;");
       }
     script(type='text/javascript', src='/js/bootstrap.js')
-
+    
 include modals/alert
 include modals/confirm
 

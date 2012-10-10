@@ -1,17 +1,13 @@
 {
-    "name": "node-login",
+    "name": "Dialogue.io",
     "version": "1.0.0",
-    "description": "A template for quickly building login systems on top of Node.js & MongoDb",
+    "description": "Co-working space for students and teachers",
     "author": {
-        "name": "Stephen Braitsch",
-        "email": "stephen@braitsch.io"
+        "name": "Albert Abello",
+        "email": "albert.abello.lozano@aalto.fi"
     },
     "website":{
-        "url": "node-login.braitsch.io"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/braitsch/node-login.git"
+        "url": "dialogue.io"
     },
     "private": true,
     "dependencies": {

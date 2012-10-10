@@ -1,21 +1,17 @@
 
 
-//Dialogue.io app
-
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
 var express = require('express');
 var exp = require('express');
 
-//test comment
 var app = require('express').createServer();
 var io = require('socket.io').listen(app);
 app.use("/js", express.static(__dirname + '/js'));
 app.use("/css", express.static(__dirname + '/css'));
 app.use("/img", express.static(__dirname + '/img'));
 app.use("/logs", express.static(__dirname + '/logs'));
-//listen to any connection in 8080
 app.listen(8080, function(){
  	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
@@ -26,10 +22,6 @@ require('./app/config')(app, exp);
 require('./app/server/router')(app);
 
 var clientID = 1;
-// routing
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
-});
 
 //Builds a new logfile every 24hours
 var date = "";
@@ -39,7 +31,7 @@ var job = new cronJob({
   onTick: function() {
     // Runs every weekday
     date = new Date();
-    fs.writeFile(date.toDateString()+'.html', "Logfile for "+date+"\n", function(err) {
+    fs.writeFile(logs/date.toDateString()+'.html', "Logfile for "+date+"\n", function(err) {
       if(err) {
          console.log(err);
       } else {
@@ -89,11 +81,12 @@ io.sockets.on('connection', function (socket) {
 	
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function (data) {
+		date = new Date();
 		// we tell the client to execute 'updatechat' with 2 parameters
 		io.sockets.emit('updatechat', socket.username, data);
-		var log = fs.createWriteStream('logs/log'+date, {'flags': 'a'});
+		var log = fs.createWriteStream('logs/'+date.toDateString()+'.html', {'flags': 'a'});
 		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
-	        log.write("- "+socket.username+": "+data+"\n");
+	        log.write("- <strong>"+socket.username+":</strong> "+data+"<br>\n");
 	});
 
 	//Sending files to all users
@@ -121,6 +114,7 @@ io.sockets.on('connection', function (socket) {
 
 	// when the client emits 'adduser', this listens and executes
 	socket.on('adduser', function(username){
+		date = new Date();
 		// we store the username in the socket session for this client
 		socket.username = username;
 		// add the client's username to the global list
@@ -135,9 +129,9 @@ io.sockets.on('connection', function (socket) {
 		// update the list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
 		//console.log(sockets);
-		var log = fs.createWriteStream('logs/log'+date, {'flags': 'a'});
+		var log = fs.createWriteStream('logs/'+date.toDateString()+'.html', {'flags': 'a'});
 		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
-	        log.write("BOT : "+username+" has connected\n");
+	        //log.write("BOT : "+username+" has connected<br>\n");
 	});
 
 	// when the user disconnects.. perform this

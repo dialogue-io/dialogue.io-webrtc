@@ -233,12 +233,22 @@ module.exports = function(app) {
 	
 	
 // view & delete accounts //
-	
 	app.get('/print', function(req, res) {
+	    if (req.session.user == null){
+	// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+	    }   else{
 		AM.getAllRecords( function(e, accounts){
 			res.render('print', { locals: { title : 'Account List', accts : accounts } });
 		})
-	});	
+	    }
+	});
+	
+	//app.get('/print', function(req, res) {
+	//	AM.getAllRecords( function(e, accounts){
+	//		res.render('print', { locals: { title : 'Account List', accts : accounts } });
+	//	})
+	//});	
 	
 	app.post('/delete', function(req, res){
 		AM.delete(req.body.id, function(e, obj){
@@ -252,10 +262,10 @@ module.exports = function(app) {
 	    });
 	});
 	
-	app.get('/reset', function(req, res) {
-		AM.delAllRecords( );
-		res.redirect('/print');
-	});
+	//app.get('/reset', function(req, res) {
+	//	AM.delAllRecords( );
+	//	res.redirect('/print');
+	//});
 	
 	app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
 

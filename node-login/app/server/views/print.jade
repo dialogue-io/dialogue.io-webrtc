@@ -1,4 +1,6 @@
-
+script(type='text/javascript')
+	mixpanel.track('User list page', {'page name' : document.title, 'url' : window.location.pathname});
+	mixpanel.track_pageview("/print.html");
 div.container(style='margin:20px')
 	table.table.table-bordered.table-striped
 		thead

@@ -1,9 +1,9 @@
 
 module.exports = {
 	
-	host		: 'smtp.gmail.com',
-	user 		: 'tgnmotor@gmail.com',
-	password 	: '977217087',
-	sender		: 'TGNMOTOR <tgnmotor@gmail.com>'
+	host		: 'localhost',
+	user 		: '',
+	password 	: '',
+	sender		: 'Dialogue.io <no-reply@dialogue.io>'
 	
 }

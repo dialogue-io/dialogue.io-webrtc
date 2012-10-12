@@ -3,9 +3,13 @@ var bcrypt = require('bcrypt')
 var Db = require('mongodb').Db;
 var Server = require('mongodb').Server;
 
-var dbPort = 27017;
-var dbHost = global.host;
-var dbName = 'login-testing';
+//var dbPort = 27017;
+//var dbHost = global.host;
+//var dbName = 'login-testing';
+
+var dbPort = 10000;
+var dbHost = 'alex.mongohq.com';
+var dbName = 'Dialoguedb';
 
 // use moment.js for pretty date-stamping //
 var moment = require('moment');
@@ -13,14 +17,15 @@ var moment = require('moment');
 var AM = {}; 
 	AM.db = new Db(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}, {}));
 	AM.db.open(function(e, d){
-		if (e) {
-			console.log(e);
-		}	else{
-			console.log('connected to database :: ' + dbName);
-		}
+		AM.db.authenticate('dialogue', 'dialogue-webrtc', function(err2,data2){
+			if (e || err2) {
+				console.log(e+' '+err2);
+			}	else{
+				console.log('connected to database :: ' + dbName);
+			}
+		});
 	});
 	AM.accounts = AM.db.collection('accounts');
-
 module.exports = AM;
 
 // logging in //

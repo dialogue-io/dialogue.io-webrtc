@@ -10,6 +10,7 @@ div.container(style='margin:20px')
 				th(style='width:200px') Location
 				th(style='width:180px') Username
 				th Account Created
+				th Last Login
 		tbody
 		- for (var i = 0; i < accts.length; i++)
 			tr
@@ -18,3 +19,4 @@ div.container(style='margin:20px')
 				td= accts[i].country
 				td= accts[i].user
 				td= accts[i].date
+				td= accts[i].lastdate

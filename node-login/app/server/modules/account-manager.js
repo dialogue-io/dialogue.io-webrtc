@@ -34,7 +34,14 @@ AM.autoLogin = function(user, pass, callback)
 {
 	AM.accounts.findOne({user:user}, function(e, o) {
 		if (o){
-			o.pass == pass ? callback(o) : callback(null);
+			if (o.pass == pass) {
+				o.lastdate = moment().format('MMMM Do YYYY, h:mm:ss a');
+				AM.accounts.save(o);
+				callback(o);
+			} else {
+				callback(null);
+			}
+			//o.pass == pass ? callback(o) : callback(null);
 		}	else{
 			callback(null);
 		}
@@ -49,6 +56,8 @@ AM.manualLogin = function(user, pass, callback)
 		}	else{
 			bcrypt.compare(pass, o.pass, function(err, res) {
 				if (res){
+					o.lastdate = moment().format('MMMM Do YYYY, h:mm:ss a');
+					AM.accounts.save(o);
 					callback(null, o);
 				}	else{
 					callback('invalid-password');				

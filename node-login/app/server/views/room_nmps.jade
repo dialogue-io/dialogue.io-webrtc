@@ -96,7 +96,7 @@ head
       }
       });
       // listener, whenever the server emits 'updatechat', this updates the chat body
-      socket.on('updatechat', function (username, data) {
+      socket.on('updatechat', function (username, data, sticky) {
         $.titleAlert("New chat message!", {
             requireBlur:false,
             stopOnFocus:true,
@@ -107,9 +107,13 @@ head
         var hours = date.getHours()
         var minutes = date.getMinutes()
         if (minutes < 10){
-        minutes = "0" + minutes
+            minutes = "0" + minutes
         }
-      $('#chat-body').append('<tr"><td style:"color: #A65500;"><strong>'+username+'</strong> ['+hours+':'+minutes+']</td><td style:"color: #A65500;">'+data+'</td></tr>');
+        if (sticky=='true') {
+            $('#chat-body').append('<tr"><td style="min-width: 140px; color: black;"><strong>'+username+'</strong></td><td style="min-width: 400px; color: black;">'+data+'</td></tr>');
+        } else {
+            $('#chat-body').append('<tr"><td style="min-width: 140px; color: black;"><strong>'+username+'</strong> ['+hours+':'+minutes+']</td><td style="min-width: 400px; color: black;">'+data+'</td></tr>');
+        }
       $('#chat').scrollTop(9000);
       });
       //Listener for incomming signaling messages

@@ -69,6 +69,48 @@ var walk = function(dir, done) {
   });
 };
 
+function readLines(input, func) {
+  var remaining = '';
+  var total = 0;
+  var count = 0;
+  
+  input.on('data', function(data) {
+	for (i=0; i < data.length; ++i)
+		if (data[i] == 10) count++;
+    remaining += data;
+    var index = remaining.indexOf('\n');
+    var last  = 0;
+    while (index > -1) {
+      var line = remaining.substring(last, index);
+      last = index + 1;
+	if (count-total < 20) {
+		func(line);
+	}
+	total++;
+      index = remaining.indexOf('\n', last);
+    }
+
+    remaining = remaining.substring(last);
+  });
+
+  input.on('end', function() {
+    if (remaining.length > 0) {
+	if (total <= 0) {
+		func(remaining);
+		total++;
+	}
+    }
+  });
+}
+
+//function func(data) {
+  //console.log(data);
+//}
+
+
+
+
+
 var usernames = {};
 var sockets = {};
 var ids = {};
@@ -128,13 +170,31 @@ io.sockets.on('connection', function (socket) {
 		//sockets[username] = socket;
 		ids[username] = socket.id;
 		// echo to client they've connected
-		socket.emit('updatechat', '', 'you have connected');
+		//socket.emit('updatechat', '', 'you have connected');
 		// echo globally (all clients) that a person has connected
-		socket.broadcast.emit('updatechat', '', username + ' has connected');
+		//socket.broadcast.emit('updatechat', '', username + ' has connected');
 		// update the list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
+		try {
+			fs.exists('logs/'+date.toDateString()+'.html', function (exists) {
+				if (exists == true) {
+					console.log("here");
+					//The file does exist
+					var input = fs.createReadStream('logs/'+date.toDateString()+'.html');
+					var file = true;
+					function func(data) {
+						console.log(data.split('</strong>')[1]);
+						socket.emit('updatechat',data.split('<strong>')[1].split(':</strong>')[0] , data.split('</strong>')[1],'true');
+					}
+					readLines(input, func);
+				}
+			});
+		}
+		catch (e) {
+			console.log(e);
+		}
 		//console.log(sockets);
-		var log = fs.createWriteStream('logs/'+date.toDateString()+'.html', {'flags': 'a'});
+		//var log = fs.createWriteStream('logs/'+date.toDateString()+'.html', {'flags': 'a'});
 		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
 	        //log.write("BOT : "+username+" has connected<br>\n");
 	});
@@ -147,6 +207,6 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
 		socket.broadcast.emit('disconnect',socket.username);
-		socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
+		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
 	});
 });

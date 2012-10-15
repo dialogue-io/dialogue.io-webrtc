@@ -1,5 +1,5 @@
 
-function HomeController()
+function roomController()
 {	
 	
 // bind event listeners to button clicks //
@@ -62,24 +62,8 @@ function HomeController()
 			type: "GET",
 			data: { id: $('#userId').val()},
 			success: function(data){
-				$('#account-form-container').hide();
+				$('#room_container').hide();
 				$('#body_html').html(data);
-			},
-			error: function(jqXHR){
-				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
-			}		
-		});
-	}
-
-	this.attemptRoomNmps = function()
-	{
-		var that = this;
-		$.ajax({
-			url: "/rooms/nmps",
-			type: "GET",
-			data: { id: $('#userId').val()},
-			success: function(data){
-				$('#home_container').html(data);
 			},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
@@ -97,13 +81,13 @@ function HomeController()
 	}
 }
 
-HomeController.prototype.onUpdateSuccess = function()
+roomController.prototype.onUpdateSuccess = function()
 {
 	$('.modal-alert').modal({ show : false, keyboard : true, backdrop : true });				
 	$('.modal-alert .modal-header h3').text('Success!');
 	$('.modal-alert .modal-body p').html('Your account has been updated.'); 				
 	$('.modal-alert').modal('show');
 	$('.modal-alert button').off('click');
-	$('#account-form-container').show();
+	$('#room_container').show();
 	$('#body_html').html('');
 }

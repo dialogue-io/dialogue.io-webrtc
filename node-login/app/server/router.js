@@ -11,7 +11,7 @@ module.exports = function(app) {
 	console.log('login', req.cookies.user, req.cookies.pass);		
 	// check if the user's credentials are saved in a cookie //
 		if (req.cookies.user == undefined || req.cookies.pass == undefined){
-			res.render('login', { locals: { title: 'Hello - Please Login To Your Account' }});
+			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
 		}	else{
 	// attempt automatic login //
 			AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
@@ -19,7 +19,7 @@ module.exports = function(app) {
 				    req.session.user = o;
 					res.redirect('/home');
 				}	else{
-					res.render('login', { locals: { title: 'Hello - Please Login To Your Account' }});
+					res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
 				}
 			});
 		}
@@ -149,7 +149,7 @@ module.exports = function(app) {
 		//Checks email address, if aalto.fi is inside allows access to NMPS room
 		//console.log(req.session.user.email.split('@')[1]);
 		if (req.session.user.email.split('@')[1] == 'aalto.fi') {
-			res.render('room_nmps', {
+			res.render('room', {
 				locals: {
 					title : 'NMPS Room - dialogue.io',
 					countries : CT,
@@ -161,30 +161,34 @@ module.exports = function(app) {
 		}
 	    }
 	});
-	
+
 	app.post('/rooms/nmps', function(req, res){
 	// check if the user's credentials are saved in a cookie //
-	   if (req.cookies.user == undefined || req.cookies.pass == undefined){
-	      res.render('login', 
-		 { locals: 
-		    { title: 'Hello - Please Login To Your Account' }
-		 }
-	      );
-	   } else{
-	   // attempt automatic login //
-	      AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
-		 if (o != null){
-		    req.session.user = o;
-		    res.redirect('/rooms/nmps');
-		 }  else{
-		    res.render('login', 
-		       { locals: 
-			  { title: 'Hello - Please Login To Your Account' }
-		       }
-		    );
-		 }
-	      });
-	   }
+		if (req.param('user') != undefined) {
+			AM.update({
+				user 		: req.param('user'),
+				name 		: req.param('name'),
+				email 		: req.param('email'),
+				country 	: req.param('country'),
+				pass		: req.param('pass')
+			}, function(o){
+				if (o){
+					req.session.user = o;
+			// udpate the user's login cookies if they exists //
+					if (req.cookies.user != undefined && req.cookies.pass != undefined){
+						res.cookie('user', o.user, { maxAge: 900000 });
+						res.cookie('pass', o.pass, { maxAge: 900000 });	
+					}
+					res.send('ok', 200);
+				}	else{
+					res.send('error-updating-account', 400);
+				}
+			});
+		}	else if (req.param('logout') == 'true'){
+			res.clearCookie('user');
+			res.clearCookie('pass');
+			req.session.destroy(function(e){ res.send('ok', 200); });
+		}	
 	});
 	
 // creating new accounts //	

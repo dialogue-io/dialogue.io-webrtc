@@ -36,7 +36,7 @@ input(type='hidden', value= user.email)#userEmail
 					input#user-tf.input-xlarge.disabled(type='text', name='user', value= user.user)
 			#pass-cg.control-group
 				label.control-label(for='pass-tf') Password
-				.controls
+				.controls2
 					input#pass-tf.input-xlarge(type='password', name='pass', value='')
 			.form-actions
 				button(type='button')#account-form-btn1.btn
@@ -51,5 +51,5 @@ script(src='/vendor/jquery.form.js')
 script(src='/vendor/bootstrap-modal.js')
 script(src='/vendor/bootstrap-transition.js')
 script(src='/js/form-validators/accountValidator.js')
-script(src='/js/views/home.js')
-script(src='/js/controllers/homeController.js')
+script(src='/js/views/settings.js')
+script(src='/js/controllers/settingsController.js')

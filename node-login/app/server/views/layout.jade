@@ -13,3 +13,15 @@ html
 		link(rel='stylesheet', href='/vendor/bootstrap.min.css')
 		link(rel='stylesheet', href='/css/style.css')
 	body!= body
+		- if (typeof(udata) != 'undefined')
+			div.navbar.navbar-fixed-top
+				div.navbar-inner
+					div.container-fluid
+						ul#global-nav.nav.pull-left
+							a(href='/home').brand dialogue.io
+						button#btn-settings.btn.btn
+							| Settings
+						button#btn-logout.btn.btn-primary
+							i.icon-lock.icon-white
+							| Sign Out
+			div(id='body_html')

@@ -28,7 +28,7 @@ $(document).ready(function(){
 	$('#name-tf').focus();
 	//$('#github-banner').css('top', '41px');
 
-// customize the account settings form //
+// customize the account form //
 	
 	$('#account-form h1').text('Account Settings');
 	$('#account-form #sub1').text('Here are the current settings for your account.');

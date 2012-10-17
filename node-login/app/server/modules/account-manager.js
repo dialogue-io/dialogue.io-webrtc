@@ -108,6 +108,15 @@ AM.update = function(newData, callback)
 	});
 }
 
+AM.updateAdmin = function(newData, callback) 
+{		
+	AM.accounts.findOne({user:newData.user}, function(e, o){
+		o.admin		= newData.admin;
+		AM.accounts.save(o); callback(true);
+	});
+}
+
+
 AM.setPassword = function(oldp, newp, callback)
 {
 	AM.accounts.findOne({pass:oldp}, function(e, o){

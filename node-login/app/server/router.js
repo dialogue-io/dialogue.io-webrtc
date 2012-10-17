@@ -5,6 +5,12 @@ var EM = require('./modules/email-dispatcher');
 
 module.exports = function(app) {
 
+	app.dynamicHelpers({
+    	token: function(req, res) {
+        	return req.session._csrf;
+    	}
+	});
+
 // main login page //
 
 	app.get('/', function(req, res){
@@ -51,6 +57,79 @@ module.exports = function(app) {
 			});
 		}
 	});	
+
+// Admin page //
+
+	app.get('/admin', function(req, res) {
+	    if (req.session.user == null){
+	// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+	    }   else{
+			console.log('Admin entering: '+req.session.user.email+' '+req.session.user.admin);
+			if (req.session.user.admin == "true") {
+				console.log('Admin is in: '+req.session.user.email);
+				AM.getAllRecords( function(e, accounts){
+					res.render('admin', {
+						locals: {
+							title : 'dialogue.io - Admin page',
+							countries : CT,
+							udata : req.session.user,
+							accts : accounts
+						}
+					});
+				})
+			} else {
+				res.redirect('/');
+			}
+	    }
+	});
+	
+	app.post('/admin', function(req, res){
+	// check if the user's credentials are saved in a cookie //
+		if (req.session.user.admin == "true") {
+			if (req.param('user') != undefined) {
+				AM.update({
+					user 		: req.param('user'),
+					name 		: req.param('name'),
+					email 		: req.param('email'),
+					country 	: req.param('country'),
+					pass		: req.param('pass')
+				}, function(o){
+					if (o){
+						req.session.user = o;
+				// udpate the user's login cookies if they exists //
+						if (req.cookies.user != undefined && req.cookies.pass != undefined){
+							res.cookie('user', o.user, { maxAge: 900000 });
+							res.cookie('pass', o.pass, { maxAge: 900000 });	
+						}
+						res.send('ok', 200);
+					}	else{
+						res.send('error-updating-account', 400);
+					}
+				});
+			}	else if (req.param('logout') == 'true'){
+				res.clearCookie('user');
+				res.clearCookie('pass');
+				req.session.destroy(function(e){ res.send('ok', 200); });
+			}	else if (req.param('update') == 'true'){
+				for (var user in req.param('users')){
+					var obj = req.param('users')[user];
+					AM.updateAdmin({
+						user 		: obj.name,
+						admin		: obj.admin
+					}, function(o){
+						if (o == true){
+							res.send('ok', 200);
+						}	else {
+							res.send('error-updating-account', 400);
+						}
+					});
+				}
+			}
+		} else {
+			res.redirect('/');
+		}
+	});
 	
 // logged-in user homepage //
 	
@@ -59,13 +138,23 @@ module.exports = function(app) {
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
 	    }   else{
-			res.render('home', {
-				locals: {
-					title : 'dialogue.io',
-					countries : CT,
-					udata : req.session.user
-				}
-			});
+			if (req.session.user.admin == "true") {
+				res.render('home', {
+					locals: {
+						title : 'dialogue.io',
+						countries : CT,
+						udata : req.session.user
+					}
+					});
+			} else {
+				res.render('home', {
+					locals: {
+						title : 'dialogue.io',
+						countries : CT,
+						udata : req.session.user
+					}
+				});
+			}
 	    }
 	});
 	
@@ -188,7 +277,7 @@ module.exports = function(app) {
 			res.clearCookie('user');
 			res.clearCookie('pass');
 			req.session.destroy(function(e){ res.send('ok', 200); });
-		}	
+		}
 	});
 	
 // creating new accounts //	
@@ -205,7 +294,8 @@ module.exports = function(app) {
 			email 	: req.param('email'),
 			user 	: req.param('user'),
 			pass	: req.param('pass'),
-			country : req.param('country')
+			country : req.param('country'),
+			admin   : false
 		}, function(e, o){
 			if (e){
 				res.send(e, 400);

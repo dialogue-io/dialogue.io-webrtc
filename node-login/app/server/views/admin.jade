@@ -1,0 +1,45 @@
+// display form errors in a custom modal window //
+script(type='text/javascript')
+	mixpanel.track('Admin page', {'page name' : document.title, 'url' : window.location.pathname});
+	mixpanel.track_pageview("/admin.html");
+div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
+	#admin-form-container
+			#admin-form.form-horizontal.well
+				h1
+					| Users avaliable
+				hr
+				fieldset	
+					table.table.table-bordered.table-striped
+						thead
+							tr
+								th(style='width:auto') #
+								th(style='width:auto') Name
+								th(style='width:auto') Location
+								th(style='width:auto') Username
+								th Account Created
+								th Last Login
+								th Admin
+						tbody
+						- for (var i = 0; i < accts.length; i++)
+							tr
+								td= i+1
+								td= accts[i].name
+								td= accts[i].country
+								td= accts[i].user
+								td= accts[i].date
+								td= accts[i].lastdate
+								-if (accts[i].admin == "true")
+									td
+										input(type="checkbox", class='admin', id='#{accts[i].user}',  checked)
+								-else
+									td
+										input(type="checkbox", class='admin', id='#{accts[i].user}',  checked = false)
+					button(type='submit')#admin-form-btn2.btn
+						| Update
+
+script(src='/vendor/jquery.min.js')
+script(src='/vendor/jquery.form.js')
+script(src='/vendor/bootstrap-modal.js')
+script(src='/vendor/bootstrap-transition.js')
+script(src='/js/form-validators/accountValidator.js')
+script(src='js/views/admin.js')

@@ -6,6 +6,7 @@ var path = require('path');
 var express = require('express');
 var exp = require('express');
 
+
 var app = require('express').createServer();
 var io = require('socket.io').listen(app);
 app.use("/js", express.static(__dirname + '/js'));
@@ -16,6 +17,13 @@ app.listen(8080, function(){
  	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
 app.root = __dirname;
+
+app.dynamicHelpers({
+    token: function(req, res) {
+        return req.session._csrf;
+    }
+});
+
 global.host = 'localhost';
 
 require('./app/config')(app, exp);

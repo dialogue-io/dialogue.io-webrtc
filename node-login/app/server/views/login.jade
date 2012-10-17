@@ -3,6 +3,7 @@ script(type='text/javascript')
         mixpanel.track_pageview("/login.html");
 #login-container
         form( method="post")#login-form.well.span4
+            input(type='hidden', name='_csrf', value=token)
             h1 Hello!
             p.subheading Please Login To Your Account
             label Username 

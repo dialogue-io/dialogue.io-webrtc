@@ -40,26 +40,15 @@ var clientID = 1;
 //Recursive system to list the amount of logfiles in the directory
 var walk = function(dir, done) {
   var results = [];
-  fs.readdir(dir, function(err, list) {
-    if (err) return done(err);
-    var pending = list.length;
-    if (!pending) return done(null, results);
-    list.forEach(function(file) {
-      //file = dir + '/' + file;
-      file = file;
-      fs.stat(file, function(err, stat) {
-        if (stat && stat.isDirectory()) {
-          walk(file, function(err, res) {
-            results = results.concat(res);
-            if (!--pending) done(null, results);
-          });
-        } else {
-          results.push(file);
-          if (!--pending) done(null, results);
-        }
-      });
-    });
-  });
+	var files = fs.readdirSync(dir)
+	              .map(function(v) { 
+	                  return { name:v,
+	                           time:fs.statSync(dir + v).mtime.getTime()
+	                         }; 
+	               })
+	               .sort(function(a, b) { return b.time - a.time; })
+	               .map(function(v) { return v.name; });
+	done(null,files);
 };
 
 function readLines(input, func) {

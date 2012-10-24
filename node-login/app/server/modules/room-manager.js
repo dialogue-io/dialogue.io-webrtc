@@ -164,6 +164,17 @@ RM.isMember = function(address, member, callback)
 	});
 };
 
+RM.checkLogs = function(address, callback) 
+{
+	RM.rooms.findOne({address:address}, function(e, o) {
+		if (o.logs == "on"){
+			callback(true);
+		} else {
+			callback(false);
+		}
+	});
+};
+
 RM.checkToken = function(address, token, member, callback) 
 {	
 	//Checks token and adds member if token is correct

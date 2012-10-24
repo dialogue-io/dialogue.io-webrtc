@@ -1,5 +1,4 @@
 
-
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
@@ -8,6 +7,7 @@ var exp = require('express');
 var ensureDir = require('ensureDir');
 
 fs.exists = fs.exists || require('path').exists;
+
 
 
 var app = require('express').createServer();
@@ -32,7 +32,8 @@ global.host = 'localhost';
 require('./app/config')(app, exp);
 require('./app/server/router')(app);
 
-//app.use("/room", express.static(__dirname + '/room'));
+//Database access
+var RM = require('./app/server/modules/room-manager');
 
 var clientID = 1;
 
@@ -160,9 +161,12 @@ io.sockets.on('connection', function (socket) {
 		}
 		// we tell the client to execute 'updatechat' with 2 parameters
 		io.sockets.in(socket.room).emit('updatechat', socket.username.split('(')[0], data);
-		var log = fs.createWriteStream('room/'+socket.room+'/logs/'+date.toDateString()+'.html', {'flags': 'a'});
-		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
-	        log.write("- <strong>"+socket.username.split('(')[0]+"["+hours+":"+minutes+"]:</strong> "+data+"<br>\n");
+		RM.checkLogs(socket.room, function(status){
+			if (status == true) {
+				var log = fs.createWriteStream('room/'+socket.room+'/logs/'+date.toDateString()+'.html', {'flags': 'a'});
+		        log.write("- <strong>"+socket.username.split('(')[0]+"["+hours+":"+minutes+"]:</strong> "+data+"<br>\n");
+			}
+		});
 	});
 
 	//Sending files to all users
@@ -204,8 +208,5 @@ io.sockets.on('connection', function (socket) {
 		// echo globally that this client has left
 		io.sockets.in(socket.room).emit('disconnect',socket.username);
 		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
-	});
-});
-, '', socket.username + ' has disconnected');
 	});
 });

@@ -252,10 +252,6 @@ module.exports = function(app) {
 			res.clearCookie('pass');
 			req.session.destroy(function(e){ res.send('ok', 200); });
 		}	else if (req.param('createroom') != undefined){
-			/*console.log(req.param('name'));
-			console.log(req.param('address'));
-			console.log(req.param('token'));*/
-			//console.log(JSON.stringify(req.param('memberslist')));
 			//Converts the string of users to members in JSON format
 			RM.create({
 				name 	: req.param('name'),
@@ -263,6 +259,7 @@ module.exports = function(app) {
 				token 	: req.param('token'),
 				owner	: req.param('createroom'),
 				members : req.param('memberslist'),
+				logs	: req.param('logs')
 			}, function(e, o){
 				if (e){
 					res.send(e, 400);

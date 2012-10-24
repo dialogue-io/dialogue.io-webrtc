@@ -22,10 +22,6 @@ script(type='text/javascript')
 !!! 5
 html(lang='en', style='height: 100%;')
 head
-    meta(charset='utf-8')
-    title WebRTC Multichat
-    meta(name='description', content='')
-    meta(name='author', content='')
     link(href='/css/bootstrap.css', rel='stylesheet')
     style
       body {
@@ -61,10 +57,11 @@ head
           h2 Users
           table.table-condensed
             tbody#users-body
-          h2 Logs
-          #logfiles
-          script(type='text/javascript')
-            mixpanel.track_links('#logfiles a', 'Logfile opened');
+          - if (room.logs == 'on')
+            h2 Logs
+            #logfiles
+            script(type='text/javascript')
+              mixpanel.track_links('#logfiles a', 'Logfile opened');
         .span9(style='height: 100%;')
           #chat(style='height: 80%; overflow: auto; margin: 2%; border: 1px solid #CCC; border-radius: 5px; background-color: white;')
             table.table.table-condensed

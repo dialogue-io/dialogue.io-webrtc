@@ -71,15 +71,18 @@ module.exports = function(app) {
 			if (req.session.user.admin == "true") {
 				console.log('Admin is in: '+req.session.user.email);
 				AM.getAllRecords( function(e, accounts){
-					res.render('admin', {
-						locals: {
-							title : 'dialogue.io - Admin page',
-							countries : CT,
-							udata : req.session.user,
-							accts : accounts
-						}
+					RM.getAllRecords( function(e, roomslist) {
+						res.render('admin', {
+							locals: {
+								title : 'dialogue.io - Admin page',
+								countries : CT,
+								udata : req.session.user,
+								accts : accounts,
+								rooms : roomslist
+							}
+						});
 					});
-				})
+				});
 			} else {
 				res.redirect('/');
 			}
@@ -318,7 +321,26 @@ module.exports = function(app) {
 	//Handling logs
 
 	app.get('/room/:room/:option/:file'  , function(req, res) {
-		res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+		if (req.session.user == null){
+			// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+        } else {
+        	//Check if user is member of the room, if not redirect to homepage and prohibit to access logfile
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
+	    		if (o.owner == req.session.user.user) {
+					res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+	    		} else {
+					RM.isMember(req.params.room.toLowerCase(), req.session.user.user, function(status){
+						//Not owner but member of the room
+						if (status == true) {
+							res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+						} else {
+					        res.redirect('/');
+						}
+					});    			
+	    		}
+	    	});
+	    }
 	});
 	
 	app.get('/room/:room', function(req, res) {

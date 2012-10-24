@@ -43,6 +43,8 @@ RM.create = function(newData, callback)
 				}	else{
 					RM.saltAndHash(newData.token, function(hash){
 						newData.token = hash;
+						newData.lastaccess = "";
+						newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
 					// append date stamp when record was created //
 					    for (i=0; i<memberslist.split(',').length; i++) {
 					    	newData.members.push(memberslist.split(',')[i]);
@@ -141,6 +143,8 @@ RM.findByAddress = function(address, callback)
 {
 	RM.rooms.findOne({address:address}, function(e, o) {
 		if (o){
+			o.lastaccess = moment().format('MMMM Do YYYY, h:mm:ss a');
+			RM.rooms.save(o);
 			callback(null,o);
 		} else {
 			callback(e,null);

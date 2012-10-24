@@ -39,7 +39,6 @@ var clientID = 1;
 
 //Recursive system to list the amount of logfiles in the directory
 var walk = function(dir, done) {
-  var results = [];
 	var files = fs.readdirSync(dir)
 	              .map(function(v) { 
 	                  return { name:v,
@@ -197,5 +196,8 @@ io.sockets.on('connection', function (socket) {
 		// echo globally that this client has left
 		io.sockets.in(socket.room).emit('disconnect',socket.username);
 		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
+	});
+});
+nnected');
 	});
 });

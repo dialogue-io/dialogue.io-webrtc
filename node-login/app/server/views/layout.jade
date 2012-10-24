@@ -38,11 +38,13 @@ html
 								| Admin Page
 							script(type='text/javascript')
 								$('#btn-admin').click(function(){ window.location.href = '/admin'; });
-						button#btn-settings.btn.btn
-							| Settings
-						button#btn-logout.btn.btn-primary
-							i.icon-lock.icon-white
-							| Sign Out
+						p.navbar-text.pull-right
+							| Welcome #{udata.name}!
+							button#btn-settings.btn.btn
+								| Settings
+							button#btn-logout.btn.btn-primary
+								i.icon-lock.icon-white
+								| Sign Out 
 			div(id='body_html')
 
 

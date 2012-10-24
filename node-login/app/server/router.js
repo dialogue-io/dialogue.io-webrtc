@@ -4,8 +4,6 @@ var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
 var RM = require('./modules/room-manager');
 
-var exp = require('express');
-
 
 module.exports = function(app) {
 
@@ -462,7 +460,7 @@ module.exports = function(app) {
 	
 	
 // view & delete accounts //
-	app.get('/print', function(req, res) {
+	/*app.get('/print', function(req, res) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
@@ -489,7 +487,7 @@ module.exports = function(app) {
 				res.send('record not found', 400);
 			}
 	    });
-	});
+	});*/
 	
 	//app.get('/reset', function(req, res) {
 	//	AM.delAllRecords( );

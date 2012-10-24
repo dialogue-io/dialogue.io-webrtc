@@ -13,8 +13,8 @@ fs.exists = fs.exists || require('path').exists;
 var app = require('express').createServer();
 var io = require('socket.io').listen(app);
 
-app.use("/js", express.static(__dirname + '/js'));
-app.use("/css", express.static(__dirname + '/css'));
+//app.use("/js", express.static(__dirname + '/js'));
+//app.use("/css", express.static(__dirname + '/css'));
 app.use("/img", express.static(__dirname + '/img'));
 app.listen(8080, function(){
  	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

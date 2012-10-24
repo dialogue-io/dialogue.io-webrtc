@@ -19,6 +19,30 @@ function HomeController()
 	
 // handle account deletion //	
 	$('.modal-confirm .submit').click(function(){ that.deleteAccount(); });
+
+	/*$('.room').click(function(){that.attemptRoom(this);});
+
+	this.attemptRoom = function(click)
+	{
+		var that = this;
+		$.ajax({
+			url: "/room/" + $(click).attr("id"),
+			type: "GET",
+			data: { id: $('#userId').val()},
+		    success: function(data, textStatus) {
+		        if (data) {
+		            // data.redirect contains the string URL to redirect to
+		            window.location.href = "/room/" + $(click).attr("id");
+		        } else {
+		            // data.form contains the HTML for the replacement form
+		            console.log(data)
+		        }
+		    },
+			error: function(jqXHR){
+				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
+			}		
+		});
+	}*/
 	
 	this.deleteAccount = function()
 	{

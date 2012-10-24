@@ -21,7 +21,7 @@ var AM = {};
 			if (e || err2) {
 				console.log(e+' '+err2);
 			}	else{
-				console.log('connected to database :: ' + dbName);
+				console.log('connected to database users:: ' + dbName);
 			}
 		});
 	});

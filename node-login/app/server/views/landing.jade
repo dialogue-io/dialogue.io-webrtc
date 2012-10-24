@@ -5,7 +5,14 @@ div(id='home_container')
 		p#sub1.subheading Please tell us a little about yourself.
 		hr
 		h3
-			a(href='/rooms/nmps').brand NMPS
+			h3 Member
+			- for (var i = 0; i < rooms.length; i++)
+				a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name} 
+				br
+			h3 Owned
+			- for (var i = 0; i < roomsowned.length; i++)
+				a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name} 
+				br
 
 // display form errors in a custom modal window //
 

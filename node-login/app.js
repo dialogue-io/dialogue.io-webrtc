@@ -5,14 +5,18 @@ var fs = require('fs');
 var path = require('path');
 var express = require('express');
 var exp = require('express');
+var ensureDir = require('ensureDir');
+
+fs.exists = fs.exists || require('path').exists;
 
 
 var app = require('express').createServer();
 var io = require('socket.io').listen(app);
+
 app.use("/js", express.static(__dirname + '/js'));
 app.use("/css", express.static(__dirname + '/css'));
 app.use("/img", express.static(__dirname + '/img'));
-app.use("/logs", express.static(__dirname + '/logs'));
+//app.use("/logs", express.static(__dirname + '/logs'));
 app.listen(8080, function(){
  	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
@@ -29,28 +33,9 @@ global.host = 'localhost';
 require('./app/config')(app, exp);
 require('./app/server/router')(app);
 
-var clientID = 1;
+app.use("/room", express.static(__dirname + '/room'));
 
-//Builds a new logfile every 24hours
-var date = "";
-var cronJob = require('cron').CronJob;
-var job = new cronJob({
-  cronTime: '00 01 00 * * 1-7',
-  onTick: function() {
-    // Runs every weekday
-    date = new Date();
-    fs.writeFile(logs/date.toDateString()+'.html', "Logfile for "+date+"\n", function(err) {
-      if(err) {
-         console.log(err);
-      } else {
-          console.log("New logfile was saved!");
-      }
-    });
-  },
-  start: false,
-  timeZone: "Europe/Helsinki"
-});
-job.start();
+var clientID = 1;
 
 //Recursive system to list the amount of logfiles in the directory
 var walk = function(dir, done) {
@@ -111,24 +96,61 @@ function readLines(input, func) {
   });
 }
 
-//function func(data) {
-  //console.log(data);
-//}
-
-
-
-
-
-var usernames = {};
+//var usernames = {};
+var usernamesdb = [];
+var data = {rooms: []};
 var sockets = {};
 var ids = {};
 io.sockets.on('connection', function (socket) {
 	
-	walk(process.cwd()+"/logs", function(err, results) {
-	  if (err) throw err;
-	  io.sockets.emit('logfiles', results);
+	socket.on('setRoom',function(info){
+		date = new Date();
+		socket.username = info.username;
+		socket.room = info.room;
+		if (usernamesdb[info.room] == null || usernamesdb[info.room] == '') {
+			usernamesdb[info.room] = [];
+			//var tmp ={}; tmp[info.username]=info.username;
+			usernamesdb[info.room].push(info.username);
+		} else {
+			//var tmp ={}; tmp[info.username]=info.username;
+			usernamesdb[info.room].push(info.username);
+		}
+		//console.log(usernamesdb[info.room]);
+		//usernames[info.username]=info.username;
+		socket.join(info.room);
+		ids[info.username] = socket.id;
+		//console.log(usernames);
+		io.sockets.in(socket.room).emit('updateusers', usernamesdb[info.room]);
+		ensureDir('./room/'+socket.room+'/logs/', 0755, function (err) {
+			if(err) return next(err);
+			try {
+				fs.exists('room/'+socket.room+'/logs/'+date.toDateString()+'.html', function (exists) {
+					if (exists == true) {
+						//The file does exist
+						var input = fs.createReadStream('room/'+socket.room+'/logs/'+date.toDateString()+'.html');
+						var file = true;
+						function func(data) {
+							console.log(data.split('</strong>')[1]);
+							socket.emit('updatechat',data.split('<strong>')[1].split(':</strong>')[0] , data.split('</strong>')[1],'true');
+						}
+						readLines(input, func);
+					}
+				});
+			}
+			catch (e) {
+				console.log(e);
+			}
+			try {
+				walk(process.cwd()+'/room/'+info.room+'/logs/', function(err, results) {
+				  if (err) throw err;
+				  io.sockets.emit('logfiles', results);
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
 	});
-	
+
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function (data) {
 		date = new Date();
@@ -138,8 +160,8 @@ io.sockets.on('connection', function (socket) {
 			minutes = "0" + minutes
 		}
 		// we tell the client to execute 'updatechat' with 2 parameters
-		io.sockets.emit('updatechat', socket.username.split('(')[0], data);
-		var log = fs.createWriteStream('logs/'+date.toDateString()+'.html', {'flags': 'a'});
+		io.sockets.in(socket.room).emit('updatechat', socket.username.split('(')[0], data);
+		var log = fs.createWriteStream('room/'+socket.room+'/logs/'+date.toDateString()+'.html', {'flags': 'a'});
 		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
 	        log.write("- <strong>"+socket.username.split('(')[0]+"["+hours+":"+minutes+"]:</strong> "+data+"<br>\n");
 	});
@@ -147,13 +169,13 @@ io.sockets.on('connection', function (socket) {
 	//Sending files to all users
 	socket.on('file', function (data) {
 		// we tell the client to execute 'updatechat' with 2 parameters
-		io.sockets.emit('file', socket.username, data);
+		io.sockets.in(socket.room).emit('file', socket.username, data);
 	});
 
 	//Sending images
 	socket.on('image', function (data) {
 		// we tell the client to execute 'updatechat' with 2 parameters
-		io.sockets.emit('image', socket.username, data);
+		io.sockets.in(socket.room).emit('image', socket.username, data);
 	});
 		
 	//Handling signalling messages
@@ -165,56 +187,23 @@ io.sockets.on('connection', function (socket) {
 		//socket_to = sockets[to_id];
 		io.sockets.socket(ids[message.to]).emit('onSignaling',message);
 	});
-	
-
-	// when the client emits 'adduser', this listens and executes
-	socket.on('adduser', function(username){
-		date = new Date();
-		// we store the username in the socket session for this client
-		socket.username = username;
-		// add the client's username to the global list
-		usernames[username] = username;
-		//Store socket for sending individually
-		//sockets[username] = socket;
-		ids[username] = socket.id;
-		// echo to client they've connected
-		//socket.emit('updatechat', '', 'you have connected');
-		// echo globally (all clients) that a person has connected
-		//socket.broadcast.emit('updatechat', '', username + ' has connected');
-		// update the list of users in chat, client-side
-		io.sockets.emit('updateusers', usernames);
-		try {
-			fs.exists('logs/'+date.toDateString()+'.html', function (exists) {
-				if (exists == true) {
-					console.log("here");
-					//The file does exist
-					var input = fs.createReadStream('logs/'+date.toDateString()+'.html');
-					var file = true;
-					function func(data) {
-						console.log(data.split('</strong>')[1]);
-						socket.emit('updatechat',data.split('<strong>')[1].split(':</strong>')[0] , data.split('</strong>')[1],'true');
-					}
-					readLines(input, func);
-				}
-			});
-		}
-		catch (e) {
-			console.log(e);
-		}
-		//console.log(sockets);
-		//var log = fs.createWriteStream('logs/'+date.toDateString()+'.html', {'flags': 'a'});
-		// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
-	        //log.write("BOT : "+username+" has connected<br>\n");
-	});
 
 	// when the user disconnects.. perform this
 	socket.on('disconnect', function(){
 		// remove the username from global usernames list
-		delete usernames[socket.username];
+		//delete usernames[socket.username];
+		for( var key in usernamesdb[socket.room] ) {
+			if (usernamesdb[socket.room][key] == socket.username) {
+				usernamesdb[socket.room].splice(key,1);
+			}
+		}
+		//console.log(userlist[0]);
+		//delete usernamesdb[socket.room][socket.username];
+		delete ids[socket.username];
 		// update list of users in chat, client-side
-		io.sockets.emit('updateusers', usernames);
+		io.sockets.in(socket.room).emit('updateusers', usernamesdb[socket.room]);
 		// echo globally that this client has left
-		socket.broadcast.emit('disconnect',socket.username);
+		io.sockets.in(socket.room).emit('disconnect',socket.username);
 		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
 	});
 });

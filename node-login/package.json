@@ -20,6 +20,7 @@
         "emailjs": ">= 0.2.9",
         "socket.io": "0.9.6",
 	"cron": "",
+	"ensureDir: "",
 	"time": ""
   },
     "engines": {

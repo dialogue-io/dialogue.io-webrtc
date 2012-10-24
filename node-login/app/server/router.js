@@ -2,6 +2,7 @@
 var CT = require('./modules/country-list');
 var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
+var RM = require('./modules/room-manager');
 
 module.exports = function(app) {
 
@@ -138,21 +139,40 @@ module.exports = function(app) {
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
 	    }   else{
+	    	roomlistowned = '';
 			if (req.session.user.admin == "true") {
-				res.render('home', {
-					locals: {
-						title : 'dialogue.io',
-						countries : CT,
-						udata : req.session.user
-					}
+				RM.findByOwner(req.session.user.user,function(e, roomlist){
+					//console.log(roomlist);
+					roomlistowned = roomlist;
+					roomlist='';
+					RM.findByMember(req.session.user.user,function(e,roomlist){
+						res.render('home', {
+							locals: {
+								title : 'dialogue.io',
+								countries : CT,
+								udata : req.session.user,
+								rooms : roomlist,
+								roomsowned : roomlistowned
+							}
+						});
 					});
+				});
 			} else {
-				res.render('home', {
-					locals: {
-						title : 'dialogue.io',
-						countries : CT,
-						udata : req.session.user
-					}
+				RM.findByOwner(req.session.user.user,function(e, roomlist){
+					//console.log(roomlist);
+					roomlistowned = roomlist;
+					roomlist='';
+					RM.findByMember(req.session.user.user,function(e,roomlist){
+						res.render('home', {
+							locals: {
+								title : 'dialogue.io',
+								countries : CT,
+								udata : req.session.user,
+								rooms : roomlist,
+								roomsowned : roomlistowned
+							}
+						});
+					});
 				});
 			}
 	    }
@@ -185,6 +205,73 @@ module.exports = function(app) {
 			req.session.destroy(function(e){ res.send('ok', 200); });
 		}
 	});	
+
+// Create room homepage //
+	
+	app.get('/createroom', function(req, res) {
+	    if (req.session.user == null){
+	// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+	    }   else{
+			res.render('createroom', {
+				locals: {
+					title : 'dialogue.io - Create your own room',
+					countries : CT,
+					udata : req.session.user
+				}
+			});
+	    }
+	});
+	
+	app.post('/createroom', function(req, res){
+		if (req.param('user') != undefined) {
+			AM.update({
+				user 		: req.param('user'),
+				name 		: req.param('name'),
+				email 		: req.param('email'),
+				country 	: req.param('country'),
+				pass		: req.param('pass')
+			}, function(o){
+				if (o){
+					req.session.user = o;
+			// udpate the user's login cookies if they exists //
+					if (req.cookies.user != undefined && req.cookies.pass != undefined){
+						res.cookie('user', o.user, { maxAge: 900000 });
+						res.cookie('pass', o.pass, { maxAge: 900000 });	
+					}
+					res.send('ok', 200);
+				}	else{
+					res.send('error-updating-account', 400);
+				}
+			});
+		}	else if (req.param('logout') == 'true'){
+			res.clearCookie('user');
+			res.clearCookie('pass');
+			req.session.destroy(function(e){ res.send('ok', 200); });
+		}	else if (req.param('createroom') != undefined){
+			/*console.log(req.param('name'));
+			console.log(req.param('address'));
+			console.log(req.param('token'));*/
+			//console.log(JSON.stringify(req.param('memberslist')));
+			//Converts the string of users to members in JSON format
+			RM.create({
+				name 	: req.param('name'),
+				address 	: req.param('address'),
+				token 	: req.param('token'),
+				owner	: req.param('createroom'),
+				members : req.param('memberslist'),
+			}, function(e, o){
+				if (e){
+					res.send(e, 400);
+				}	else{
+					res.send('ok', 200);
+				}
+			});
+		}
+
+	});	
+
+
 
 // Settings for users //
 
@@ -230,28 +317,55 @@ module.exports = function(app) {
 
 // Room for NMPS //
 
-	app.get('/rooms/nmps', function(req, res) {
+	app.get('/room/*', function(req, res) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
-	    }   else{
-		//Checks email address, if aalto.fi is inside allows access to NMPS room
-		//console.log(req.session.user.email.split('@')[1]);
-		if (req.session.user.email.split('@')[1] == 'aalto.fi') {
-			res.render('room', {
-				locals: {
-					title : 'NMPS Room - dialogue.io',
-					countries : CT,
-					udata : req.session.user
-				}
+	    } else {
+	    	//Checks URL and saves the name of room in req.params[0]
+	    	RM.findByAddress(req.params[0].toLowerCase(),function(e,o){
+	    		if (o) {
+	    			if (o.owner == req.session.user.user) {
+						res.render('room', {
+							locals: {
+								title : o.name+' room - dialogue.io',
+								udata : req.session.user,
+								room : o
+							}
+						});
+					} else {
+						RM.isMember(req.params[0].toLowerCase(), req.session.user.user, function(status){
+							//Not owner but member of the room
+							if (status == true) {
+								res.render('room', {
+									locals: {
+										title : o.name+' room - dialogue.io',
+										udata : req.session.user,
+										room : o
+									}
+								});
+							} else {
+								res.render('token', {
+									locals: {
+										title : o.name+' access - dialogue.io',
+										udata : req.session.user,
+										room : o
+									}
+								});
+								//We need to enter the token for accessing if not members
+							}
+							//res.send("token");
+						});
+					}
+	    		} else {
+	    			res.redirect('/');
+	    		}
 			});
-		} else {
-			res.redirect('/');
-		}
 	    }
 	});
 
-	app.post('/rooms/nmps', function(req, res){
+
+	app.post('/room/*', function(req, res){
 	// check if the user's credentials are saved in a cookie //
 		if (req.param('user') != undefined) {
 			AM.update({
@@ -277,6 +391,16 @@ module.exports = function(app) {
 			res.clearCookie('user');
 			res.clearCookie('pass');
 			req.session.destroy(function(e){ res.send('ok', 200); });
+		} else if (req.param('token') != undefined) {
+			RM.checkToken(req.param('address'),req.param('token')[0],req.session.user.user, function(response){
+				if (response == 'invalid-token') {
+					res.send('invalid-token',400);
+				} else if(response == 'room-not-found') {
+					res.send('room-not-found',400);
+				} else if(response.address) {
+					res.redirect('/room/'+response.address);
+				}
+			});
 		}
 	});
 	

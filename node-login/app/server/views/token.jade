@@ -1,0 +1,39 @@
+// preset form values if we receive a userdata object //
+- user = typeof(udata) != 'undefined' ? udata : {}
+- room = typeof(udata) != 'undefined' ? room : {}
+// store the userId on the client side in a hidden input field //
+input(type='hidden', value= user._id)#userId
+input(type='hidden', value= user.name)#userName
+input(type='hidden', value= user.date)#userCreated
+input(type='hidden', value= user.country)#userCountry
+input(type='hidden', value= user.user)#userUserName
+input(type='hidden', value= user.email)#userEmail
+input(type='hidden', value= room.name)#roomName
+input(type='hidden', value= room.address)#roomAddress
+
+div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
+	div.row
+		div.span12#token-form-container
+			form( method="post")#token-form.form-horizontal.well.span7
+				input(type='hidden', name='_csrf', value=token)
+				h1 #{room.name} token access
+				hr 
+				legend
+					| Token code to access #{room.name}, ask the owner :D
+				fieldset
+					#token-cg.control-group
+						label.control-label(for='token-tf') Token
+						.controls
+							input#token-tf.input-xlarge(type='text', name='token')
+							span.help-block#tokenhelp 
+					.form-actions
+						button(type='submit')#token-form-submit.btn
+							| Submit
+
+include modals/alert
+include modals/confirm
+
+script(src='/vendor/jquery.form.js')
+script(src='/vendor/bootstrap-modal.js')
+script(src='/vendor/bootstrap-transition.js')
+script(src='/js/views/token.js')

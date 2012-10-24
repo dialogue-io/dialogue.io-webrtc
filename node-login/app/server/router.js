@@ -4,6 +4,9 @@ var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
 var RM = require('./modules/room-manager');
 
+var exp = require('express');
+
+
 module.exports = function(app) {
 
 	app.dynamicHelpers({
@@ -317,13 +320,19 @@ module.exports = function(app) {
 
 // Room for NMPS //
 
-	app.get('/room/*', function(req, res) {
-	    if (req.session.user == null){
+	//Handling logs
+
+	app.get('/room/:room/:option/:file'  , function(req, res) {
+		res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+	});
+	
+	app.get('/room/:room', function(req, res) {
+		if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
 	    } else {
 	    	//Checks URL and saves the name of room in req.params[0]
-	    	RM.findByAddress(req.params[0].toLowerCase(),function(e,o){
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
 	    		if (o) {
 	    			if (o.owner == req.session.user.user) {
 						res.render('room', {
@@ -334,7 +343,7 @@ module.exports = function(app) {
 							}
 						});
 					} else {
-						RM.isMember(req.params[0].toLowerCase(), req.session.user.user, function(status){
+						RM.isMember(req.params.room.toLowerCase(), req.session.user.user, function(status){
 							//Not owner but member of the room
 							if (status == true) {
 								res.render('room', {
@@ -364,8 +373,7 @@ module.exports = function(app) {
 	    }
 	});
 
-
-	app.post('/room/*', function(req, res){
+	app.post('/room/:rooms', function(req, res){
 	// check if the user's credentials are saved in a cookie //
 		if (req.param('user') != undefined) {
 			AM.update({

@@ -61,7 +61,7 @@ $(document).ready(function(){
 	    $.each(logs, function (key, value) {
 	        if (value.split('.')[0].length = !0) {
 	            //console.log(value.split('.'));
-	            $('#logfiles').append('<tr><td id="' + value + '"><a href="/room/'+roomName.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a></td></tr>');
+	            $('#logfiles').append('<tr><td id="' + value + '"><a href="/room/'+roomAddress.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a></td></tr>');
 	        }
 	    });
 	});

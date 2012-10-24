@@ -16,7 +16,6 @@ var io = require('socket.io').listen(app);
 app.use("/js", express.static(__dirname + '/js'));
 app.use("/css", express.static(__dirname + '/css'));
 app.use("/img", express.static(__dirname + '/img'));
-//app.use("/logs", express.static(__dirname + '/logs'));
 app.listen(8080, function(){
  	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
@@ -33,7 +32,7 @@ global.host = 'localhost';
 require('./app/config')(app, exp);
 require('./app/server/router')(app);
 
-app.use("/room", express.static(__dirname + '/room'));
+//app.use("/room", express.static(__dirname + '/room'));
 
 var clientID = 1;
 
@@ -205,5 +204,8 @@ io.sockets.on('connection', function (socket) {
 		// echo globally that this client has left
 		io.sockets.in(socket.room).emit('disconnect',socket.username);
 		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
+	});
+});
+, '', socket.username + ' has disconnected');
 	});
 });

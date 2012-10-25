@@ -198,6 +198,3 @@ io.sockets.on('connection', function (socket) {
 		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
 	});
 });
-nnected');
-	});
-});

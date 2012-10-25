@@ -62,10 +62,10 @@ div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
 						td= rooms[i].lastaccess
 						-if (rooms[i].logs == "on")
 							td
-								input(type="checkbox", class='admin', id='#{accts[i].user}',  checked)
+								input(type="checkbox", disabled="disabled", class='admin', id='#{rooms[i].address}',  checked)
 						-else
 							td
-								input(type="checkbox", class='admin', id='#{accts[i].user}',  checked = false)
+								input(type="checkbox", disabled="disabled", class='admin', id='#{rooms[i].address}',  checked = false)
 
 script(src='/vendor/jquery.min.js')
 script(src='/vendor/jquery.form.js')

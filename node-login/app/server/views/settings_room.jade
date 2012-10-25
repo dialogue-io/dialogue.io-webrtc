@@ -1,9 +1,7 @@
-// display form errors in a custom modal window //
-script(type='text/javascript')
-	mixpanel.track('Create room page', {'page name' : document.title, 'url' : window.location.pathname});
-	mixpanel.track_pageview("/createroom.html");
 // preset form values if we receive a userdata object //
 - user = typeof(udata) != 'undefined' ? udata : {}
+- room = typeof(room) != 'undefined' ? room : {}
+
 // store the userId on the client side in a hidden input field //
 input(type='hidden', value= user._id)#userId
 input(type='hidden', value= user.name)#userName
@@ -11,38 +9,50 @@ input(type='hidden', value= user.date)#userCreated
 input(type='hidden', value= user.country)#userCountry
 input(type='hidden', value= user.user)#userUserName
 input(type='hidden', value= user.email)#userEmail
+input(type='hidden', value= room.name)#roomName
+input(type='hidden', value= room.address)#roomAddress
+input(type='hidden', value= room._id)#roomId
+input(type='hidden', value= room.members)#roomMembers
+
 div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
 	div.row
 		div.span12
-			form( method="post")#createroom-form.form-horizontal.well.span7
+			form( method="post")#updateroom-form.form-horizontal.well.span7
 					input(type='hidden', name='_csrf', value=token)
 					legend
-						| Create your room
+						| Update your room
 					fieldset
 						#name-cg.control-group
 							label.control-label(for='name-tf') Name
 							.controls
-								input#name-tf.input-xlarge(type='text', name='name')
+								input#name-tf.input-xlarge(type='text', name='name', value='#{room.name}') 
 								span.help-block#namehelp This is the name of your room
 						#address-cg.control-group
 							label.control-label(for='address-tf') Url
 							.controls
-								input#address-tf.input-xlarge(type='text', name='address', value='')
+								input#address-tf.input-xlarge(type='text', name='address', value='#{room.address}') 
 								span.help-block#urlhelp Url to your room, format dialogue.io/room/yourownroom
 						hr
 						p#sub2.subheading
 						#members-cg.control-group
 							label.control-label(for='members-tf') Username
 							.controls
-								input#members-tf.input-xlarge.disabled(type='text', name='members', placeholder='Member username')
+								input#members-tf.input-xlarge.disabled(type='text', name='members', placeholder='Member username', value='')
 								button(type='button')#membersadd.btn Add
 								span.help-block#membershelp Add members usernames that will access the room
-								div#memberslist-div
-						#logs-cg.control-group
-							label.control-label(for='members-tf') Logfiles
-							.controls
-								input#logs-tf.checkbox(type='checkbox', name='logs')
-								span.help-block#logshelp Check to allow the creation of logfiles
+								table.table#memberstable(style='overflow: auto; width:auto;')
+						- if(room.logs == 'on')
+							#logs-cg.control-group
+								label.control-label(for='logs-tf') Logfiles
+								.controls
+									input#logs-tf.checkbox(type='checkbox', name='logs', checked)
+									span.help-block#logshelp Check to allow the creation of logfiles
+						- if(room.logs == 'off')
+							#logs-cg.control-group
+								label.control-label(for='members-tf') Logfiles
+								.controls
+									input#logs-tf.checkbox(type='checkbox', name='logs', checked = false)
+									span.help-block#logshelp Check to allow the creation of logfiles						
 						#token-cg.control-group
 							label.control-label(for='token-tf') Access token
 							.controls
@@ -50,12 +60,14 @@ div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
 								button(type='button')#randomtoken.btn Generate
 								span.help-block#tokenhelp This secret word has to be given to all members that will access the room
 						.form-actions
-							button(type='submit')#createroom-form-submit.btn
-								| Create
+							button(type='submit')#updateroom-form-submit.btn
+								| Update
+							button(type='button')#deleteroom-form-btn.btn
+								| Delete Room
 
 include modals/alert
 script(src='/vendor/jquery.min.js')
 script(src='/vendor/jquery.form.js')
 script(src='/vendor/bootstrap-modal.js')
 script(src='/vendor/bootstrap-transition.js')
-script(src='js/views/createroom.js')
+script(src='/js/views/settings_room.js')

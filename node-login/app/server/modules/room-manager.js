@@ -59,18 +59,21 @@ RM.create = function(newData, callback)
 
 RM.update = function(newData, callback) 
 {		
-	RM.rooms.findOne({user:newData.user}, function(e, o){
+	RM.rooms.findOne({address:newData.address}, function(e, o){
 		o.name 		= newData.name;
-		o.url 	= newData.url;
-		o.token 	= newData.token;
-		if (newData.pass == ''){
-			RM.rooms.save(o); callback(o);
+		//o.address   = newData.address;
+		o.members   = newData.members;
+		o.logs  = newData.logs;
+		//o.owner = newData.owner;
+		if (newData.token == ''){
+			RM.rooms.save(o); callback(null,o);
 		}	else{
-			RM.saltAndHash(newData.pass, function(hash){
-				o.pass = hash;
-				RM.rooms.save(o); callback(o);			
+			RM.saltAndHash(newData.token, function(hash){
+				o.token = hash;
+				RM.rooms.save(o); callback(null,o);			
 			});
 		}
+		callback(e);
 	});
 }
 
@@ -201,3 +204,8 @@ RM.checkToken = function(address, token, member, callback)
 		}
 	});
 };
+
+RM.delete = function(id, callback) 
+{
+	RM.rooms.remove({_id: this.getObjectId(id)}, callback);
+}

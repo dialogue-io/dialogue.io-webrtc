@@ -29,6 +29,7 @@ html
 					div.container-fluid
 						ul#global-nav.nav.pull-left
 							a(href='/home').brand dialogue.io
+						- if (typeof(room) == 'undefined')
 							button#btn-new-room.btn.btn
 								| Create Room
 							script(type='text/javascript')
@@ -40,8 +41,17 @@ html
 								$('#btn-admin').click(function(){ window.location.href = '/admin'; });
 						p.navbar-text.pull-right
 							| Welcome #{udata.name}!
-							button#btn-settings.btn.btn
-								| Settings
+							- if (typeof(room) == 'undefined')
+								button#btn-settings.btn.btn
+									| Settings
+								script(type='text/javascript')
+									$('#btn-settings').click(function(){ window.location.href = '/settings'; });
+							- if (typeof(room) != 'undefined')
+								- if (room.owner == udata.user)
+									button#btn-room-settings.btn.btn
+										| Room settings
+									script(type='text/javascript')
+										$('#btn-room-settings').click(function(){ window.location.href = window.location.pathname+'/settings'; });
 							button#btn-logout.btn.btn-primary
 								i.icon-lock.icon-white
 								| Sign Out 

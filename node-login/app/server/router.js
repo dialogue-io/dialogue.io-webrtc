@@ -324,7 +324,7 @@ module.exports = function(app) {
 		if (req.session.user == null){
 			// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
-        } else {
+        } else if (req.params.option == 'logs') {
         	//Check if user is member of the room, if not redirect to homepage and prohibit to access logfile
 	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
 	    		if (o.owner == req.session.user.user) {
@@ -342,7 +342,67 @@ module.exports = function(app) {
 	    	});
 	    }
 	});
-	
+
+	app.get('/room/:room/:option'  , function(req, res) {
+		if (req.session.user == null){
+			// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+        } else if (req.params.option == 'settings') {
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
+	    		if (o.owner == req.session.user.user) {
+					res.render('settings_room', {
+						locals: {
+							title : o.name+' room settings - dialogue.io',
+							udata : req.session.user,
+							room : o
+						}
+					});
+	    		} else {
+			        res.redirect('/');			
+	    		}
+	    	});        	
+	    }
+	});
+
+	app.post('/room/:room/:option'  , function(req, res) {
+		if (req.session.user == null){
+			// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+        } else if (req.params.option == 'settings') {
+	        if (req.param('updateroom') != undefined){
+				//Converts the string of users to members in JSON format
+				RM.update({
+					name 	: req.param('name'),
+					address 	: req.param('address'),
+					token 	: req.param('token'),
+					owner	: req.param('updateroom'),
+					members : req.param('memberslist'),
+					logs	: req.param('logs')
+				}, function(e, o){
+					if (e){
+						res.send(e, 400);
+					}	else{
+						res.send('ok', 200);
+					}
+				});
+			}
+		} else if (req.params.option == 'delete') {
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
+	    		if (o.owner == req.session.user.user) {
+					RM.delete(req.param('id'), function(e, obj){
+						if (!e){
+							res.redirect('/');
+						}	else{
+							res.send('record not found', 400);
+						}
+					});
+	    		} else {
+			        res.redirect('/');			
+	    		}
+	    	});     
+		}
+	});
+
 	app.get('/room/:room', function(req, res) {
 		if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
@@ -497,7 +557,7 @@ module.exports = function(app) {
 	//	AM.getAllRecords( function(e, accounts){
 	//		res.render('print', { locals: { title : 'Account List', accts : accounts } });
 	//	})
-	//});	
+	//});*/	
 	
 	app.post('/delete', function(req, res){
 		AM.delete(req.body.id, function(e, obj){
@@ -509,7 +569,7 @@ module.exports = function(app) {
 				res.send('record not found', 400);
 			}
 	    });
-	});*/
+	});
 	
 	//app.get('/reset', function(req, res) {
 	//	AM.delAllRecords( );

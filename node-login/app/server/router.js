@@ -483,7 +483,7 @@ module.exports = function(app) {
 				} else if(response == 'room-not-found') {
 					res.send('room-not-found',400);
 				} else if(response.address) {
-					res.redirect('/room/'+response.address);
+					res.send('ok', 200);
 				}
 			});
 		}

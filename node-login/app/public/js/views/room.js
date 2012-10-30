@@ -11,7 +11,7 @@ $(document).ready(function(){
 	//$('#name_user').html('Welcome '+userName.value);
 
 	//Starting chat code
-	var socket = io.connect('http://vr000m.ath.cx:8080');
+	var socket = io.connect('http://localhost:8080');
 	var me;
 	var Meeting = new Array();
 	var index = {};

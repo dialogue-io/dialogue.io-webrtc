@@ -192,6 +192,7 @@ RM.checkToken = function(address, token, member, callback)
 			bcrypt.compare(token, o.token, function(err, res) {
 				if (res) {
 					//Token checked and user added to the room
+					console.log(member);
 					o.members.push(member);
 					//console.log(o.members+' '+member);
 					RM.rooms.save(o, callback(o));

@@ -81,6 +81,11 @@ $(document).ready(function(){
 			}
 		},
 		success	: function(responseText, status, xhr, $form){
+            mixpanel.track('Room created', {
+                'page name': document.title,
+                'url': window.location.pathname,
+                'user': userUserName.value
+            });
 			if (status == 'success') onUpdateSuccess();
 		},
 		error : function(e){

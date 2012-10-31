@@ -67,9 +67,9 @@ $(document).ready(function(){
 	        minutes = "0" + minutes
 	    }
 	    if (sticky == 'true') {
-	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i></td><td style="min-width: 400px; color: black;"><i>' + data + '</i></td></tr>');
+	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i>: <i>' + data + '</i></td></tr>');
 	    } else {
-	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']</td><td style="min-width: 400px; color: black;">' + data + '</td></tr>');
+	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
 	    }
 	    $('#chat').scrollTop(9000);
 	});

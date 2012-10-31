@@ -65,7 +65,7 @@ head
               mixpanel.track_links('#logfiles a', 'Logfile opened');
         .span9(style='height: 100%;')
           #chat(style='height: 80%; overflow: auto; overflow-x: hidden; margin: 2%; border: 1px solid #CCC; border-radius: 5px; background-color: white;')
-            table.table.table-condensed
+            table.table.table-condensed(style="table-layout:fixed;")
               tbody#chat-body
           .span12
             .control-group

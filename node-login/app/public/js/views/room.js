@@ -2,13 +2,68 @@
 $(document).ready(function(){
 
 	var hc = new roomController();
+	var cc = new chatController();
+    $('textarea').shiftenter();
 
-	$('#name-tf').focus();
-	//$('#github-banner').css('top', '41px');
-	
-	//$('#name_label').html(userName.value);
 
-	//$('#name_user').html('Welcome '+userName.value);
+	sendChat = function(message){
+    	enteredText = $("#data").val();
+		console.log(enteredText);
+		numberOfLineBreaks = (enteredText.match(/\n/g)||[]).length;
+		characterCount = enteredText.length;
+		if ($("#data").val() != null || $("#data").val() != "" || $("#data").val() != "\n") {
+            if ($("#data").val().length > 0 && numberOfLineBreaks != characterCount && characterCount!=0) { //If something is written
+                event.preventDefault();
+                $("#data").blur();
+                var message = $('#data').val().replace(/\n\r?/g, ' <br/> ');
+                console.log(message);
+                cc.checkMarkdown(message,function(message){
+                	socket.emit('sendchat', message);
+                	$('#chat').scrollTop(9000);		                        	
+                });
+                mixpanel.track('Chat message', {
+                    'page name': document.title,
+                    'url': window.location.pathname,
+                    'user': userUserName.value
+                });
+                $('#data').val('');
+            }
+        }
+        $('#data').focus();
+	}
+	/*function getCaret(el) {
+	  if (el.selectionStart) {
+	     return el.selectionStart;
+	  } else if (document.selection) {
+	     el.focus();
+
+	   var r = document.selection.createRange();
+	   if (r == null) {
+	    return 0;
+	   }
+
+	    var re = el.createTextRange(),
+	    rc = re.duplicate();
+	    re.moveToBookmark(r.getBookmark());
+	    rc.setEndPoint('EndToStart', re);
+
+	    return rc.text.length;
+	  }  
+	  return 0;
+	}
+
+	$('textarea').keydown(function(e){
+	    if (e.keyCode == 13 && !e.shiftKey) {
+	        e.preventDefault();
+
+	    } else if (event.keyCode == 13 && event.shiftKey) {
+			event.preventDefault();           
+			var content = this.value;
+			var caret = getCaret(this);
+			this.value = content.substring(0,caret)+"\n"+content.substring(caret,content.length-1);
+			event.stopPropagation();
+		}
+	});*/
 
 	//Starting chat code
 	var socket = io.connect('http://localhost:8080');
@@ -134,17 +189,24 @@ $(document).ready(function(){
 	// on load of page
 	$(function () {
 	    // when the client hits ENTER on their keyboard
-	    $('#data').keypress(function (e) {
+	    /*('#data').keydown(function (e) {
 	        if ((me != null) || (me != "")) {
+	        	enteredText = $("#data").val();
+				numberOfLineBreaks = (enteredText.match(/\n/g)||[]).length;
+				characterCount = enteredText.length;
 	            if (e.which == 13) {
 	                if ($("#data").val() != null || $("#data").val() != "") {
-	                    if ($(this).val().length > 0) { //If something is written
+	                    if ($(this).val().length > 0 && numberOfLineBreaks != characterCount && characterCount!=0) { //If something is written
+            				console.log("breaks"+numberOfLineBreaks+"char"+characterCount);
 	                        e.preventDefault();
 	                        var message = $('#data').val();
 	                        $('#data').val('');
 	                        $(this).blur();
-	                        socket.emit('sendchat', message);
-	                        $('#chat').scrollTop(9000);
+	                        cc.checkMarkdown(message,function(message){
+	                        	//socket.emit('sendchat', message);
+	                        	$('#chat').scrollTop(9000);		                        	
+	                        });
+
 	                        mixpanel.track('Chat message', {
 	                            'page name': document.title,
 	                            'url': window.location.pathname,
@@ -155,7 +217,7 @@ $(document).ready(function(){
 	                $('#data').focus();
 	            }
 	        }
-	    });
+	    });*/
 	    $('#data').focus();
 	});
 	getUserMedia = function (callback) {
@@ -240,10 +302,7 @@ $(document).ready(function(){
 	}
 
 	function addHangButton(id) {
-	    //$('#'+id).attr('onclick','');
 	    document.getElementById(id).setAttribute('style', 'color:#A65500;');
-	    //_elem = "<input type=\\"button\" id=\"hangup"+id+"\" value=\""+id+" (Hang up)\" onclick=\"Meeting['"+id+"'].onHangup()\" />"
-	    //$('#buttons').append(_elem);
 	}
 	//Drag and drop
 	var totFSize = 0;
@@ -351,17 +410,13 @@ $(document).ready(function(){
 	        reader.readAsDataURL(file);
 	    };
 	}
-	/*$("video").click(function() {
-	      console.log("here");
-	      var src = $(this).attr("src");
-	      console.log(src);
-	      return;
-	      });*/
 	mainWindow = function (object) {
 	    $("video").css("border", "0px");
 	    document.getElementById("mainVideo").style.opacity = 1;
 	    document.getElementById("mainVideo").setAttribute("src", "");
 	    document.getElementById("mainVideo").setAttribute("src", object.getAttribute("src"));
 	    object.setAttribute("style", "-webkit-transition: opacity 2s; -webkit-transform: scale(-1, 1); opacity: 1; margin-right: 3px; height:90%; border: 2px solid #6C7B84; padding:1px;");
-	}	
-})
+	}
+
+
+});

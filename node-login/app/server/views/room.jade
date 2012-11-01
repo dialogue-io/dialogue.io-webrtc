@@ -24,6 +24,7 @@ script(type='text/javascript')
 html(lang='en', style='height: 100%;')
 head
     link(href='/css/bootstrap.css', rel='stylesheet')
+    link(href='https://raw.github.com/cburgmer/jquery-shiftenter/v0.0.4/jquery.shiftenter.css', rel='stylesheet')
     style
       body {
       padding-top: 10px;
@@ -70,7 +71,7 @@ head
           .span12
             .control-group
               .controls
-                textarea#data(type='text', style='min-width: 95%; max-width: 95%;')
+                textarea#data(style='min-width: 95%; max-width: 95%;')
       .row-fluid(style='height: 30%;')
         .span12(style='height: 90%;')
           .span4(style='max-width: 20%; height: 90%;')
@@ -96,4 +97,6 @@ script(type='text/javascript', src='/js/bootstrap.js')
 include modals/alert
 include modals/confirm
 script(src='/js/views/room.js')
+script(src='/js/views/jquery.shiftenter.js')
 script(src='/js/controllers/roomController.js')
+script(src='/js/controllers/chatController.js')

@@ -4,11 +4,11 @@ $(document).ready(function(){
 	var hc = new roomController();
 	var cc = new chatController();
     $('textarea').shiftenter();
+	$('#chat').scrollTop(9000);		                        	
 
 
 	sendChat = function(message){
     	enteredText = $("#data").val();
-		console.log(enteredText);
 		numberOfLineBreaks = (enteredText.match(/\n/g)||[]).length;
 		characterCount = enteredText.length;
 		if ($("#data").val() != null || $("#data").val() != "" || $("#data").val() != "\n") {
@@ -16,7 +16,6 @@ $(document).ready(function(){
                 event.preventDefault();
                 $("#data").blur();
                 var message = $('#data').val().replace(/\n\r?/g, ' <br/> ');
-                console.log(message);
                 cc.checkMarkdown(message,function(message){
                 	socket.emit('sendchat', message);
                 	$('#chat').scrollTop(9000);		                        	
@@ -123,10 +122,11 @@ $(document).ready(function(){
 	    }
 	    if (sticky == 'true') {
 	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i>: <i>' + data + '</i></td></tr>');
+	    	$('#chat').scrollTop(9000);		                        	
 	    } else {
 	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
+        	$('#chat').scrollTop(9000);		                        	
 	    }
-	    $('#chat').scrollTop(9000);
 	});
 
 	//Listener for incomming signaling messages
@@ -188,37 +188,8 @@ $(document).ready(function(){
 	var mainVideo = document.getElementById("mainVideo");
 	// on load of page
 	$(function () {
-	    // when the client hits ENTER on their keyboard
-	    /*('#data').keydown(function (e) {
-	        if ((me != null) || (me != "")) {
-	        	enteredText = $("#data").val();
-				numberOfLineBreaks = (enteredText.match(/\n/g)||[]).length;
-				characterCount = enteredText.length;
-	            if (e.which == 13) {
-	                if ($("#data").val() != null || $("#data").val() != "") {
-	                    if ($(this).val().length > 0 && numberOfLineBreaks != characterCount && characterCount!=0) { //If something is written
-            				console.log("breaks"+numberOfLineBreaks+"char"+characterCount);
-	                        e.preventDefault();
-	                        var message = $('#data').val();
-	                        $('#data').val('');
-	                        $(this).blur();
-	                        cc.checkMarkdown(message,function(message){
-	                        	//socket.emit('sendchat', message);
-	                        	$('#chat').scrollTop(9000);		                        	
-	                        });
-
-	                        mixpanel.track('Chat message', {
-	                            'page name': document.title,
-	                            'url': window.location.pathname,
-	                            'user': userUserName.value
-	                        });
-	                    }
-	                }
-	                $('#data').focus();
-	            }
-	        }
-	    });*/
 	    $('#data').focus();
+    	$('#chat').scrollTop(9000);		                        	
 	});
 	getUserMedia = function (callback) {
 	    // getUserMedia() feature detection

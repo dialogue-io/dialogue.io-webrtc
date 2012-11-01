@@ -37,18 +37,20 @@ function chatController() {
 		var m="";
 		for (i=0; i<message.split(' ').length; i++){
 			word = message.split(' ')[i];
-			//console.log(word);
 			if (word.match('/url:')) {
-				console.log(word.split('/url:')[1]);
 				mod = '<a href="http://'+word.split('/url:')[1]+'" target="_blank">'+word.split('/url:')[1]+'</a>';
 				m = m.concat(mod+' ');
 			} else if (word.match('@')) {
-				if (word.split('@')[1] == userUserName.value) {
+				if (word.split('@')[0] == null || word.split('@')[0] == '') {
 					mod = '<strong>'+word+'</strong>';
 					m = m.concat(mod+' ');
 				} else {
-					m = m.concat(word+' ');
+					mod = '<a href="mailto:'+word+'">'+word+'</a>'
+					m = m.concat(mod+' ');
 				}
+			} else if (word.match('www.')) {
+				mod = '<a href="http://www.'+word.split('www.')[1]+'" target="_blank">www.'+word.split('www.')[1]+'</a>';
+				m = m.concat(mod+' ');
 			} else {
 				m = m.concat(word+' ');
 			}

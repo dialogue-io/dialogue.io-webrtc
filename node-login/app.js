@@ -119,7 +119,7 @@ io.sockets.on('connection', function (socket) {
 						var file = true;
 						function func(data) {
 							console.log(data.split('</strong>')[1]);
-							socket.emit('updatechat',data.split('<strong>')[1].split(':</strong>')[0] , data.split('</strong>')[1],'true');
+							socket.emit('updatechat',data.split('<strong>')[1].split(':</strong>')[0] , data.split(']:</strong>')[1],'true');
 						}
 						readLines(input, func);
 					}

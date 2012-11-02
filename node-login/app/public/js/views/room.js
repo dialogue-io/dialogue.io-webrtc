@@ -7,7 +7,16 @@ $(document).ready(function(){
 	$('#chat').scrollTop(9000);		                        	
 
 
+	if (window.webkitNotifications) {
+		notificationstoggle=true;
+	}
+	else {
+		notificationstoggle=false;
+		alert("Notifications are not supported for this Browser/OS version yet, go for Chrome or forget notifications ;)");
+	}
+
 	sendChat = function(message){
+		if (notificationstoggle) window.webkitNotifications.requestPermission();
     	enteredText = $("#data").val();
 		numberOfLineBreaks = (enteredText.match(/\n/g)||[]).length;
 		characterCount = enteredText.length;
@@ -32,7 +41,7 @@ $(document).ready(function(){
 	}
 	
 	//Starting chat code
-	var socket = io.connect('http://localhost:8080');
+	var socket = io.connect('http://vr000m.ath.cx:8080');
 	var me;
 	var Meeting = new Array();
 	var index = {};
@@ -97,6 +106,13 @@ $(document).ready(function(){
 		    }	                        	
 	    } else {
 	    	if (data.match('@'+userUserName.value)) {
+				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+					// function defined in step 2
+					n = window.webkitNotifications.createNotification('','New message', 'Private message from '+username);
+					n.show();
+				} else {
+					window.webkitNotifications.requestPermission();
+				}
 		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word; background-color: beige;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
 	        	$('#chat').scrollTop(9000);				
 			} else {

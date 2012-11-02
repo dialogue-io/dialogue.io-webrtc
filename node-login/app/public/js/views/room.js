@@ -64,12 +64,19 @@ $(document).ready(function(){
 	socket.on('logfiles', function (logs) {
 	    //Updates the list of logfiles avaliable for download
 	    $('#logfiles').empty();
+	    total=0;
 	    $.each(logs, function (key, value) {
 	        if (value.split('.')[0].length = !0) {
+				if(key > 6) {
+					total =key;
+					$('#modalBody').append(' - <a href="/room/'+roomAddress.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a> ');
+				} else {
+		            $('#logfiles').append('<tr><td id="' + value + '"><a href="/room/'+roomAddress.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a></td></tr>');
+				}
 	            //console.log(value.split('.'));
-	            $('#logfiles').append('<tr><td id="' + value + '"><a href="/room/'+roomAddress.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a></td></tr>');
 	        }
 	    });
+        if(total > 6) $('#logfiles').append('<a href="#logModal" role="button" data-toggle="modal">More...</a>');
 	});
 	socket.on('disconnect', function (username) {
 	    console.log(username + " has disconnected");

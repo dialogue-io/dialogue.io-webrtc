@@ -52,7 +52,7 @@ head
       }
       #logfiles{}
     script(type='text/javascript', src='/socket.io/socket.io.js')
-  body  
+  body
     .container-fluid(style='height: 85%; margin-top:30px;', id='room_container')
       .row-fluid(style='height: 90%;')
         .span4(style='max-width: 15%; height: 100%; overflow: auto;')
@@ -93,6 +93,14 @@ head
             | . Bugs and cakes 
             a(href='mailto:albert.abello.lozano@aalto.fi') here
             | .
+    #logModal.modal.hide.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+      .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h3#myModalLabel Logfiles
+        #modalBody.modal-body
+          p
+        .modal-footer
+          button.btn(data-dismiss='modal', aria-hidden='true') Close
 script(type='text/javascript', src='/js/bootstrap.js')
 include modals/alert
 include modals/confirm

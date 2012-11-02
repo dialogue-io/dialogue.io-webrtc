@@ -54,9 +54,9 @@ function chatController() {
 		m = m.replace(/\ \:\-\o/g,' <img src="/img/gasp.png" alt="Smiley face">');
 		m = m.replace(/\ \:\O/g,' <img src="/img/gasp.png" alt="Smiley face">');
 		m = m.replace(/\ \:\-\O/g,' <img src="/img/gasp.png" alt="Smiley face">');
-		m = m.replace(/\ \:\D/g,' <img src="/img/grin.png" alt="Smiley face">');
+		//m = m.replace(/\ \:\D/g,' <img src="/img/grin.png" alt="Smiley face">');
 		m = m.replace(/\ \:\-\D/g,' <img src="/img/grin.png" alt="Smiley face">');
-		m = m.replace(/\ \=\D/g,' <img src="/img/grin.png" alt="Smiley face">');
+		//m = m.replace(/\ \=\D/g,' <img src="/img/grin.png" alt="Smiley face">');
 		m = m.replace(/\ \:\-\p/g,' <img src="/img/tongue.png" alt="Smiley face">');
 		m = m.replace(/\ \:\p/g,' <img src="/img/tongue.png" alt="Smiley face">');
 		m = m.replace(/\ \:\-\P/g,' <img src="/img/tongue.png" alt="Smiley face">');

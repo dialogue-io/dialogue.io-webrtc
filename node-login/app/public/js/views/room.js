@@ -30,40 +30,7 @@ $(document).ready(function(){
         }
         $('#data').focus();
 	}
-	/*function getCaret(el) {
-	  if (el.selectionStart) {
-	     return el.selectionStart;
-	  } else if (document.selection) {
-	     el.focus();
-
-	   var r = document.selection.createRange();
-	   if (r == null) {
-	    return 0;
-	   }
-
-	    var re = el.createTextRange(),
-	    rc = re.duplicate();
-	    re.moveToBookmark(r.getBookmark());
-	    rc.setEndPoint('EndToStart', re);
-
-	    return rc.text.length;
-	  }  
-	  return 0;
-	}
-
-	$('textarea').keydown(function(e){
-	    if (e.keyCode == 13 && !e.shiftKey) {
-	        e.preventDefault();
-
-	    } else if (event.keyCode == 13 && event.shiftKey) {
-			event.preventDefault();           
-			var content = this.value;
-			var caret = getCaret(this);
-			this.value = content.substring(0,caret)+"\n"+content.substring(caret,content.length-1);
-			event.stopPropagation();
-		}
-	});*/
-
+	
 	//Starting chat code
 	var socket = io.connect('http://localhost:8080');
 	var me;
@@ -121,11 +88,21 @@ $(document).ready(function(){
 	        minutes = "0" + minutes
 	    }
 	    if (sticky == 'true') {
-	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i>: <i>' + data + '</i></td></tr>');
-	    	$('#chat').scrollTop(9000);		                        	
+	    	if (data.match('@'+userUserName.value)) {
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word; background-color: beige;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i>: <i>' + data + '</i></td></tr>');
+		    	$('#chat').scrollTop(9000);			    		
+		    } else {
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i>: <i>' + data + '</i></td></tr>');
+		    	$('#chat').scrollTop(9000);	
+		    }	                        	
 	    } else {
-	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
-        	$('#chat').scrollTop(9000);		                        	
+	    	if (data.match('@'+userUserName.value)) {
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word; background-color: beige;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
+	        	$('#chat').scrollTop(9000);				
+			} else {
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
+	        	$('#chat').scrollTop(9000);	
+			}	                        	
 	    }
 	});
 

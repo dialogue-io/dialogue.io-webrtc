@@ -43,8 +43,6 @@ RM.create = function(newData, callback)
 				}	else{
 					RM.saltAndHash(newData.token, function(hash){
 						newData.token = hash;
-						newData.lastaccess = "";
-						newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
 					// append date stamp when record was created //
 					    for (i=0; i<memberslist.split(',').length; i++) {
 					    	newData.members.push(memberslist.split(',')[i]);
@@ -59,21 +57,18 @@ RM.create = function(newData, callback)
 
 RM.update = function(newData, callback) 
 {		
-	RM.rooms.findOne({address:newData.address}, function(e, o){
+	RM.rooms.findOne({user:newData.user}, function(e, o){
 		o.name 		= newData.name;
-		//o.address   = newData.address;
-		o.members   = newData.members;
-		o.logs  = newData.logs;
-		//o.owner = newData.owner;
-		if (newData.token == ''){
-			RM.rooms.save(o); callback(null,o);
+		o.url 	= newData.url;
+		o.token 	= newData.token;
+		if (newData.pass == ''){
+			RM.rooms.save(o); callback(o);
 		}	else{
-			RM.saltAndHash(newData.token, function(hash){
-				o.token = hash;
-				RM.rooms.save(o); callback(null,o);			
+			RM.saltAndHash(newData.pass, function(hash){
+				o.pass = hash;
+				RM.rooms.save(o); callback(o);			
 			});
 		}
-		callback(e);
 	});
 }
 
@@ -146,8 +141,6 @@ RM.findByAddress = function(address, callback)
 {
 	RM.rooms.findOne({address:address}, function(e, o) {
 		if (o){
-			o.lastaccess = moment().format('MMMM Do YYYY, h:mm:ss a');
-			RM.rooms.save(o);
 			callback(null,o);
 		} else {
 			callback(e,null);
@@ -171,17 +164,6 @@ RM.isMember = function(address, member, callback)
 	});
 };
 
-RM.checkLogs = function(address, callback) 
-{
-	RM.rooms.findOne({address:address}, function(e, o) {
-		if (o.logs == "on"){
-			callback(true);
-		} else {
-			callback(false);
-		}
-	});
-};
-
 RM.checkToken = function(address, token, member, callback) 
 {	
 	//Checks token and adds member if token is correct
@@ -192,7 +174,6 @@ RM.checkToken = function(address, token, member, callback)
 			bcrypt.compare(token, o.token, function(err, res) {
 				if (res) {
 					//Token checked and user added to the room
-					console.log(member);
 					o.members.push(member);
 					//console.log(o.members+' '+member);
 					RM.rooms.save(o, callback(o));
@@ -205,8 +186,3 @@ RM.checkToken = function(address, token, member, callback)
 		}
 	});
 };
-
-RM.delete = function(id, callback) 
-{
-	RM.rooms.remove({_id: this.getObjectId(id)}, callback);
-}

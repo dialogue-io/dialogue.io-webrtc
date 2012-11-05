@@ -35,37 +35,7 @@ div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
 									td
 										input(type="checkbox", class='admin', id='#{accts[i].user}',  checked = false)
 					button(type='submit')#admin-form-btn2.btn
-						| Update			
-	#admin-rooms-container.well
-		h1
-			| Rooms
-		hr
-		fieldset	
-			table.table.table-bordered.table-striped
-				thead
-					tr
-						th(style='width:auto') #
-						th(style='width:auto') Name
-						th(style='width:auto') Address
-						th(style='width:auto') Owner
-						th Room Created
-						th Last Access
-						th Logs
-				tbody
-				- for (var i = 0; i < rooms.length; i++)
-					tr
-						td= i+1
-						td= rooms[i].name
-						td= rooms[i].address
-						td= rooms[i].owner
-						td= rooms[i].date
-						td= rooms[i].lastaccess
-						-if (rooms[i].logs == "on")
-							td
-								input(type="checkbox", disabled="disabled", class='admin', id='#{rooms[i].address}',  checked)
-						-else
-							td
-								input(type="checkbox", disabled="disabled", class='admin', id='#{rooms[i].address}',  checked = false)
+						| Update
 
 script(src='/vendor/jquery.min.js')
 script(src='/vendor/jquery.form.js')

@@ -11,20 +11,22 @@ input(type='hidden', value= user.user)#userUserName
 input(type='hidden', value= user.email)#userEmail
 input(type='hidden', value= room.name)#roomName
 input(type='hidden', value= room.address)#roomAddress
-input(type='hidden', value= room._id)#roomId
 
 script(type='text/javascript', src='/js/jquery.js')
 script(type='text/javascript', src='https://raw.github.com/heyman/jquery-titlealert/master/jquery.titlealert.js')
 script(type='text/javascript')
     //console.log(userRId);
     //console.log(user.name);
-    mixpanel.track('Room', {'page name' : document.title, 'url' : window.location.pathname, 'usr' : userName.value});
+    mixpanel.track('NMPS room', {'page name' : document.title, 'url' : window.location.pathname, 'usr' : userName.value});
     mixpanel.track_pageview("/room_nmps.html");
 !!! 5
 html(lang='en', style='height: 100%;')
 head
+    meta(charset='utf-8')
+    title WebRTC Multichat
+    meta(name='description', content='')
+    meta(name='author', content='')
     link(href='/css/bootstrap.css', rel='stylesheet')
-    link(href='https://raw.github.com/cburgmer/jquery-shiftenter/v0.0.4/jquery.shiftenter.css', rel='stylesheet')
     style
       body {
       padding-top: 10px;
@@ -52,26 +54,25 @@ head
       }
       #logfiles{}
     script(type='text/javascript', src='/socket.io/socket.io.js')
-  body
+  body  
     .container-fluid(style='height: 85%; margin-top:30px;', id='room_container')
       .row-fluid(style='height: 90%;')
         .span4(style='max-width: 15%; height: 100%; overflow: auto;')
           h2 Users
           table.table-condensed
             tbody#users-body
-          - if (room.logs == 'on')
-            h2 Logs
-            #logfiles
-            script(type='text/javascript')
-              mixpanel.track_links('#logfiles a', 'Logfile opened');
+          h2 Logs
+          #logfiles
+          script(type='text/javascript')
+            mixpanel.track_links('#logfiles a', 'Logfile opened');
         .span9(style='height: 100%;')
-          #chat(style='height: 80%; overflow: auto; overflow-x: hidden; margin: 2%; border: 1px solid #CCC; border-radius: 5px; background-color: white;')
-            table.table.table-condensed(style="table-layout:fixed;")
+          #chat(style='height: 80%; overflow: auto; margin: 2%; border: 1px solid #CCC; border-radius: 5px; background-color: white;')
+            table.table.table-condensed
               tbody#chat-body
           .span12
             .control-group
               .controls
-                textarea#data(style='min-width: 95%; max-width: 95%;')
+                input#data.input-xlarge(type='text', style='width: 95%;')
       .row-fluid(style='height: 30%;')
         .span12(style='height: 90%;')
           .span4(style='max-width: 20%; height: 90%;')
@@ -93,18 +94,8 @@ head
             | . Bugs and cakes 
             a(href='mailto:albert.abello.lozano@aalto.fi') here
             | .
-    #logModal.modal.hide.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
-      .modal-header
-          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-          h3#myModalLabel Logfiles
-        #modalBody.modal-body
-          p
-        .modal-footer
-          button.btn(data-dismiss='modal', aria-hidden='true') Close
 script(type='text/javascript', src='/js/bootstrap.js')
 include modals/alert
 include modals/confirm
 script(src='/js/views/room.js')
-script(src='/js/views/jquery.shiftenter.js')
 script(src='/js/controllers/roomController.js')
-script(src='/js/controllers/chatController.js')

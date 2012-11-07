@@ -54,7 +54,7 @@ $(document).ready(function(){
 	//$('#name_label').html(userName.value);
 
 	//$('#name_user').html('Welcome '+userName.value);
-	    var geocoder;
+	var geocoder;
     
 //GEOLOCATION
 	if (navigator.geolocation) {
@@ -68,7 +68,7 @@ $(document).ready(function(){
 	}
       
 	function errorFunction(){
-	  alert("Geocoder failed");
+	  console.log("Geocoder failed");
 	}
       
 	function initialize() {
@@ -100,10 +100,10 @@ $(document).ready(function(){
 		mixpanel.track('Home visit', {'page name' : document.title, 'url' : window.location.pathname, 'usr' : userName.value, 'location' : city.long_name});
     
 	    } else {
-	      alert("No results found");
+	      console.log("No results found");
 	    }
 	  } else {
-	    alert("Geocoder failed due to: " + status);
+	    console.log("Geocoder failed due to: " + status);
 	  }
 	});
       }

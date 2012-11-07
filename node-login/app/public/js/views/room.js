@@ -45,10 +45,10 @@ $(document).ready(function(){
 	
 	//Deppending on the feature array of bits we will deliver different features, chat, webrtc, datachan etc
 	//Starting chat code
-	//var socket = io.connect('http://vr000m.ath.cx:8080');
+	//var socket = io.connect('http://localhost:8080');
 	var socket = io.connect('https://dialogue.io', {secure: true});
 	var me;
-	var Meeting = new Array();
+	//var Meeting = new Array();
 	var index = {};
 	var counter = 0;
 	// on connection to server, ask for user's name with an anonymous callback
@@ -84,15 +84,17 @@ $(document).ready(function(){
         if(total > 6) $('#logfiles').append('<a href="#logModal" role="button" data-toggle="modal">More...</a>');
 	});
 	socket.on('disconnect', function (username) {
-	    console.log(username + " has disconnected");
-	    try {
-	        d = document.getElementById("webcam");
-	        Meeting[username].onForcedHangup();
-	        Meeting[username] = null;
-	        d.removeChild(document.getElementById("video" + username));
-	    } catch (e) {
-	        console.log("User not avaliable to remove " + e);
-	    }
+        if (Meeting[username]!= null) {
+		    console.log(username + " has disconnected");
+		    try {
+		        d = document.getElementById("webcam");
+		        Meeting[username].onForcedHangup();
+		        Meeting[username] = null;
+		        d.removeChild(document.getElementById("video" + username));
+		    } catch (e) {
+		        console.log("User not avaliable to remove " + e);
+		    }
+		}
 	});
 	// listener, whenever the server emits 'updatechat', this updates the chat body
 	socket.on('updatechat', function (username, data, sticky) {

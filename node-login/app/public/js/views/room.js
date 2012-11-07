@@ -1,41 +1,52 @@
 
 $(document).ready(function(){
 
+	var converter = new Showdown.converter();
 	var hc = new roomController();
+	var cc = new chatController();
+    $('textarea').shiftenter();
+	$('#chat').scrollTop(9000);		                        	
 
-	$('#name-tf').focus();
-	//$('#github-banner').css('top', '41px');
 
-// customize the account settings form //
+	if (window.webkitNotifications) {
+		notificationstoggle=true;
+	}
+	else {
+		notificationstoggle=false;
+		alert("Notifications are not supported for this Browser/OS version yet, go for Chrome or forget notifications ;)");
+	}
+
+	sendChat = function(message){
+		if (notificationstoggle) window.webkitNotifications.requestPermission();
+    	enteredText = $("#data").val();
+		numberOfLineBreaks = (enteredText.match(/\n/g)||[]).length;
+		characterCount = enteredText.length;
+		if ($("#data").val() != null || $("#data").val() != "" || $("#data").val() != "\n") {
+            if ($("#data").val().length > 0 && numberOfLineBreaks != characterCount && characterCount!=0) { //If something is written
+                //error cohntrol for Firefox
+                if (typeof (event) == null) event.preventDefault();
+                $("#data").blur();
+                var message = $('#data').val().replace(/\n\r?/g, ' <br/> ');
+                cc.checkMarkdown(message,function(message){
+					//var message = converter.makeHtml($('#data').val());
+                	socket.emit('sendchat', message);
+                	$('#chat').scrollTop(9000);		                        	
+                });
+                mixpanel.track('Chat message', {
+                    'page name': document.title,
+                    'url': window.location.pathname,
+                    'user': userUserName.value
+                });
+                $('#data').val('');
+            }
+        }
+        $('#data').focus();
+	}
 	
-	$('#account-form h1').text('Account Settings');
-	$('#account-form #sub1').text('Here are the current settings for your account.');
-	$('#user-tf').attr('disabled', 'disabled');
-	$('#account-form-btn1').html('Delete');
-	$('#account-form-btn1').addClass('btn-danger');
-	$('#account-form-btn2').html('Update');
-
-
-// customize the home form //
-	
-	$('#home-form h1').text('Rooms');
-	$('#home-form #sub1').text('Hi '+userName.value+' here are your avaliable rooms');
-	
-// setup the confirm window that displays when the user chooses to delete their account //
-
-	$('.modal-confirm').modal({ show : false, keyboard : true, backdrop : true });
-	$('.modal-confirm .modal-header h3').text('Delete Account');
-	$('.modal-confirm .modal-body p').html('Are you sure you want to delete your account?');
-	$('.modal-confirm .cancel').html('Cancel');
-	$('.modal-confirm .submit').html('Delete');
-	$('.modal-confirm .submit').addClass('btn-danger');
-	
-	//$('#name_label').html(userName.value);
-
-	//$('#name_user').html('Welcome '+userName.value);
-
+	//Deppending on the feature array of bits we will deliver different features, chat, webrtc, datachan etc
 	//Starting chat code
-	var socket = io.connect('http://vr000m.ath.cx:8080');
+	//var socket = io.connect('http://vr000m.ath.cx:8080');
+	var socket = io.connect('https://dialogue.io', {secure: true});
 	var me;
 	var Meeting = new Array();
 	var index = {};
@@ -58,12 +69,19 @@ $(document).ready(function(){
 	socket.on('logfiles', function (logs) {
 	    //Updates the list of logfiles avaliable for download
 	    $('#logfiles').empty();
+	    total=0;
 	    $.each(logs, function (key, value) {
 	        if (value.split('.')[0].length = !0) {
+				if(key > 6) {
+					total =key;
+					$('#modalBody').append(' - <a href="/room/'+roomAddress.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a> ');
+				} else {
+		            $('#logfiles').append('<tr><td id="' + value + '"><a href="/room/'+roomAddress.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a></td></tr>');
+				}
 	            //console.log(value.split('.'));
-	            $('#logfiles').append('<tr><td id="' + value + '"><a href="/room/'+roomAddress.value+'/logs/' + value + '" target="_blank">' + value.split('.')[0] + '</a></td></tr>');
 	        }
 	    });
+        if(total > 6) $('#logfiles').append('<a href="#logModal" role="button" data-toggle="modal">More...</a>');
 	});
 	socket.on('disconnect', function (username) {
 	    console.log(username + " has disconnected");
@@ -91,19 +109,38 @@ $(document).ready(function(){
 	        minutes = "0" + minutes
 	    }
 	    if (sticky == 'true') {
-	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i></td><td style="min-width: 400px; color: black;"><i>' + data + '</i></td></tr>');
+	    	if (data.match('@'+userUserName.value)) {
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word; background-color: beige;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i>: <i>' + data + '</i></td></tr>');
+		    	$('#chat').scrollTop(9000);			    		
+		    } else {
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong><i>' + username.split('[')[0] + ' </strong> [' + username.split('[')[1] + '</i>: <i>' + data + '</i></td></tr>');
+		    	$('#chat').scrollTop(9000);	
+		    }	                        	
 	    } else {
-	        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']</td><td style="min-width: 400px; color: black;">' + data + '</td></tr>');
+	    	if (data.match('@'+userUserName.value)) {
+				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+					// function defined in step 2
+					n = window.webkitNotifications.createNotification('','New message', 'Message from '+username);
+					n.show();
+				} else {
+					window.webkitNotifications.requestPermission();
+				}
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word; background-color: beige;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
+	        	$('#chat').scrollTop(9000);				
+			} else {
+		        $('#chat-body').append('<tr"><td style="min-width: 140px; color: black; word-wrap: break-word;"><strong>' + username + '</strong> [' + hours + ':' + minutes + ']: ' + data + '</td></tr>');
+	        	$('#chat').scrollTop(9000);	
+			}	                        	
 	    }
-	    $('#chat').scrollTop(9000);
 	});
 
 	//Listener for incomming signaling messages
 	socket.on('onSignaling', function (message) {
 	    if ((Meeting[message.from] == undefined) || (Meeting[message.from] == null)) {
 	        console.log("Starting call with " + message.from);
-	        Meeting[message.from] = new Conference();
-	        Meeting[message.from].setLocalVideo("localVideo", function (status) {
+	        Meeting[message.from] = new RTCchan();
+	        Meeting[message.from].Answer();
+	        /*Meeting[message.from].setLocalVideo("localVideo", function (status) {
 	            if (status == true) {
 	                //Meeting[message.from].setLocalStream(globalLocalStream);
 	                Meeting[message.from].Answer(message.from, "webcam", function (status) {
@@ -117,7 +154,8 @@ $(document).ready(function(){
 	            } else {
 	                console.log("Error");
 	            }
-	        });
+	        });*/
+	        Meeting[message.from].onChannelMessage(message);
 	        counter = counter + 1;
 	    } else if (Meeting[message.from]) {
 	        Meeting[message.from].onChannelMessage(message);
@@ -132,8 +170,7 @@ $(document).ready(function(){
 	        if (value == me) {
 	            $('#users-body').append('<tr><td id="' + userName.value + '"><h4 style="font-size: 13px;">' + userName.value + ' (me)</h4></td></tr>');
 	        } else {
-	            $('#users-body').append('<tr><td id="' + value + '"><h4 style="font-size: 13px;">' + value + '</h4></td></tr>');
-	            $('#' + key).attr('onclick', 'start("' + value + '")');
+	            $('#users-body').append('<tr><td id="' + value + '"><a id="' + value + '" class="call"><h4 style="font-size: 13px;">' + value + '</h4></a></td></tr>');
 	        }
 	    });
 	});
@@ -152,37 +189,15 @@ $(document).ready(function(){
 	    document.getElementById('drop').appendChild(img);
 	});
 
-	var globalLocalStream;
-	var localVideo = document.getElementById("localVideo");
-	var mainVideo = document.getElementById("mainVideo");
+	//var globalLocalStream;
+	//var localVideo = document.getElementById("localVideo");
+	//var mainVideo = document.getElementById("mainVideo");
 	// on load of page
 	$(function () {
-	    // when the client hits ENTER on their keyboard
-	    $('#data').keypress(function (e) {
-	        if ((me != null) || (me != "")) {
-	            if (e.which == 13) {
-	                if ($("#data").val() != null || $("#data").val() != "") {
-	                    if ($(this).val().length > 0) { //If something is written
-	                        e.preventDefault();
-	                        var message = $('#data').val();
-	                        $('#data').val('');
-	                        $(this).blur();
-	                        socket.emit('sendchat', message);
-	                        $('#chat').scrollTop(9000);
-	                        mixpanel.track('Chat message', {
-	                            'page name': document.title,
-	                            'url': window.location.pathname,
-	                            'user': userUserName.value
-	                        });
-	                    }
-	                }
-	                $('#data').focus();
-	            }
-	        }
-	    });
 	    $('#data').focus();
+    	$('#chat').scrollTop(9000);		                        	
 	});
-	getUserMedia = function (callback) {
+	/*getUserMedia = function (callback) {
 	    // getUserMedia() feature detection
 	    navigator.getUserMedia_ = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia)
 	    if (navigator.getUserMedia_) {
@@ -240,35 +255,15 @@ $(document).ready(function(){
 	function onUserMediaError(error) {
 	    console.log("Failed to get access to local media. Error code was " + error.code);
 	    alert("Failed to get access to local media. Error code was " + error.code + ".");
-	};
-
-	function start(id) {
-	    if ((Meeting[id] == undefined) || (Meeting[id] == null)) {
-	        console.log("Starting call to " + id);
-	        Meeting[id] = new Conference();
-	        Meeting[id].setLocalVideo("localVideo", function (status) {
-	            if (status == true) {
-	                //Meeting[id].setLocalStream(globalLocalStream);
-	                Meeting[id].Call(id, "webcam", function (status) {
-	                    if (status == false) {
-	                        alert("Call error!");
-	                    } else {
-	                        addHangButton(id);
-	                    }
-	                });
-	            } else {
-	                console.log("Error");
-	            }
-	        });
-	    }
-	}
+	};*/
 
 	function addHangButton(id) {
-	    //$('#'+id).attr('onclick','');
 	    document.getElementById(id).setAttribute('style', 'color:#A65500;');
-	    //_elem = "<input type=\\"button\" id=\"hangup"+id+"\" value=\""+id+" (Hang up)\" onclick=\"Meeting['"+id+"'].onHangup()\" />"
-	    //$('#buttons').append(_elem);
 	}
+
+
+
+
 	//Drag and drop
 	var totFSize = 0;
 	if (window.FileReader) {
@@ -375,17 +370,13 @@ $(document).ready(function(){
 	        reader.readAsDataURL(file);
 	    };
 	}
-	/*$("video").click(function() {
-	      console.log("here");
-	      var src = $(this).attr("src");
-	      console.log(src);
-	      return;
-	      });*/
-	mainWindow = function (object) {
+	/*mainWindow = function (object) {
 	    $("video").css("border", "0px");
 	    document.getElementById("mainVideo").style.opacity = 1;
 	    document.getElementById("mainVideo").setAttribute("src", "");
 	    document.getElementById("mainVideo").setAttribute("src", object.getAttribute("src"));
 	    object.setAttribute("style", "-webkit-transition: opacity 2s; -webkit-transform: scale(-1, 1); opacity: 1; margin-right: 3px; height:90%; border: 2px solid #6C7B84; padding:1px;");
-	}	
-})
+	}*/
+
+
+});

@@ -11,6 +11,7 @@ function chatController() {
 		if (message.split(' ').length == 1) {
 			message = ' '+message;
 		}
+		//_DoItalicsAndBold(message);
 		for (i=0; i<message.split(' ').length; i++){
 			word = message.split(' ')[i];		
 			if (word.match('/url:')) {
@@ -41,6 +42,19 @@ function chatController() {
 		});
 	}
 
+	var _DoItalicsAndBold = function(text) {
+		console.log("italics");
+		// <strong> must go first:
+		text = text.replace(/(\*\*|__)(?=\S)([^\r]*?\S[*_]*)\1/g,
+			"<strong>$2</strong>");
+
+		text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g,
+			"<em>$2</em>");
+
+		return text;
+	}
+
+
 	emotify = function(m,callback) {
 		m = m.replace(/\ \:\)/g,' <img src="/img/smile.png" alt="Smiley face">');
 		m = m.replace(/\ \:\-\)/g,' <img src="/img/smile.png" alt="Smiley face">');
@@ -67,35 +81,6 @@ function chatController() {
 		m = m.replace(/\ \:\//g,' <img src="/img/unsure.png" alt="Smiley face">');
 		m = m.replace(/\ \:\-\\/g,' <img src="/img/unsure.png" alt="Smiley face">');
 		m = m.replace(/\ \:\\/g,' <img src="/img/unsure.png" alt="Smiley face">');
-		callback(m);
-	}
-
-	emotifyNoSpace = function(m,callback) {
-		m = m.replace(/\:\)\ /g,'<img src="/img/smile.png" alt="Smiley face">');
-		m = m.replace(/\:\-\)/g,'<img src="/img/smile.png" alt="Smiley face">');
-		m = m.replace(/\:\(/g,'<img src="/img/frown.png" alt="Smiley face">');
-		m = m.replace(/\:\-\(/g,'<img src="/img/frown.png" alt="Smiley face">');
-		m = m.replace(/\:\'\(/g,'<img src="/img/cry.png" alt="Smiley face">');
-		m = m.replace(/\:\'\-\(/g,'<img src="/img/cry.png" alt="Smiley face">');
-		m = m.replace(/\O\.\o/g,'<img src="/img/confused.png" alt="Smiley face">');
-		m = m.replace(/\o\.\O/g,'<img src="/img/confused.png" alt="Smiley face">');
-		m = m.replace(/\:\o/g,'<img src="/img/gasp.png" alt="Smiley face">');
-		m = m.replace(/\:\-\o/g,'<img src="/img/gasp.png" alt="Smiley face">');
-		m = m.replace(/\:\O/g,'<img src="/img/gasp.png" alt="Smiley face">');
-		m = m.replace(/\:\-\O/g,'<img src="/img/gasp.png" alt="Smiley face">');
-		//m = m.replace(/\:\D/g,'<img src="/img/grin.png" alt="Smiley face">');
-		m = m.replace(/\:\-\D/g,'<img src="/img/grin.png" alt="Smiley face">');
-		//m = m.replace(/\=\D/g,'<img src="/img/grin.png" alt="Smiley face">');
-		m = m.replace(/\:\-\p/g,'<img src="/img/tongue.png" alt="Smiley face">');
-		m = m.replace(/\:\p/g,'<img src="/img/tongue.png" alt="Smiley face">');
-		m = m.replace(/\:\-\P/g,'<img src="/img/tongue.png" alt="Smiley face">');
-		m = m.replace(/\:\P/g,'<img src="/img/tongue.png" alt="Smiley face">');
-		m = m.replace(/\;\-\)/g,'<img src="/img/wink.png" alt="Smiley face">');
-		m = m.replace(/\;\)/g,'<img src="/img/wink.png" alt="Smiley face">');
-		m = m.replace(/\:\-\//g,'<img src="/img/unsure.png" alt="Smiley face">');
-		m = m.replace(/\:\//g,'<img src="/img/unsure.png" alt="Smiley face">');
-		m = m.replace(/\:\-\\/g,'<img src="/img/unsure.png" alt="Smiley face">');
-		m = m.replace(/\:\\/g,'<img src="/img/unsure.png" alt="Smiley face">');
 		callback(m);
 	}
 };

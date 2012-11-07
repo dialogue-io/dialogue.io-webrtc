@@ -96,20 +96,23 @@ $(document).ready(function(){
 	$('#deleteroom-form-btn').addClass('btn-danger');
 
 	$('#memberstable').ready(function(){
-		for(i=0;i<roomMembers.value.split(',').length;i++) {
-			$('#memberstable').append('<tr id="table'+roomMembers.value.split(',')[i]+'"><td><strong>'+roomMembers.value.split(',')[i]+'</strong></td><td><a id='+roomMembers.value.split(',')[i]+' class="close">&times;</a><br></td></tr>');
-			memberslist.push(roomMembers.value.split(',')[i]);
+		console.log(roomMembers.value);
+		if (roomMembers.value != "") {
+			for(i=0;i<roomMembers.value.split(',').length;i++) {
+				$('#memberstable').append('<tr id="table'+roomMembers.value.split(',')[i]+'"><td><strong>'+roomMembers.value.split(',')[i]+'</strong></td><td><a id='+roomMembers.value.split(',')[i]+' class="close">&times;</a><br></td></tr>');
+				memberslist.push(roomMembers.value.split(',')[i]);
+			}
+			$('.close').click(function(){
+				elem = $(this).attr('id')
+				$.each(memberslist, function( index, result) {
+					if(result == elem) {
+						//Remove from array
+						memberslist.splice(index, 1);
+					}
+			    });
+			    $('#table'+$(this).attr('id')).remove();
+			});
 		}
-		$('.close').click(function(){
-			elem = $(this).attr('id')
-			$.each(memberslist, function( index, result) {
-				if(result == elem) {
-					//Remove from array
-					memberslist.splice(index, 1);
-				}
-		    });
-		    $('#table'+$(this).attr('id')).remove();
-		});
 	});
 
 	$('#membersadd').click(function(){

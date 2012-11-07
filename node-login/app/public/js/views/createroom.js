@@ -7,15 +7,21 @@ $(document).ready(function(){
 	var memberslist = [];
 	//File that controls the createRoom page
 
-	$('#address-tf').change(function(){
+	/*$('#address-tf').change(function(){
 		text = $('#address-tf').val();
 		text = text.toLowerCase();
 		$('#address-tf').val(text);
-	});
-	//$('#address-tf').attr('disabled', true);
+	});*/
+	$('#address-tf').attr('disabled', true);
+	$('#address-tf').val(randomizer(10,true));
 
 	//Generate random token for access
 	$('#randomtoken').click(function(){
+		randomstring = randomizer(8);
+		$('#token-tf').val(randomstring);
+	});
+
+	function randomizer(length,bool) {
 		var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
 		var string_length = 8;
 		var randomstring = '';
@@ -23,8 +29,12 @@ $(document).ready(function(){
 			var rnum = Math.floor(Math.random() * chars.length);
 			randomstring += chars.substring(rnum,rnum+1);
 		}
-		$('#token-tf').val(randomstring);
-	});
+		if (bool == true){
+			//If it is used to build the address it should be in lower case
+			randomstring = randomstring.toLowerCase();
+		}
+		return randomstring;
+	}
 
 
 	$('#membersadd').click(function(){
@@ -44,7 +54,7 @@ $(document).ready(function(){
 		    if (exists != true) {
 				memberslist.push(formFields[3].val());
 				$('#memberslist-div').append('<strong>- '+formFields[3].val()+'</strong><br>');
-				//console.log(memberslist);
+				console.log(memberslist);
 		    }
 		}
 	});
@@ -65,18 +75,17 @@ $(document).ready(function(){
 				controlGroups[1].addClass('error'); e.push('Invalid url, should contain 4 characters');
 				$('#urlhelp').html('Invalid url, must contain 4 characters minimum');
 				return false;
-			} else if (validateAddress(formFields[1]) == false) {
-				console.log('here');
-				controlGroups[1].addClass('error'); e.push('Invalid url, change format, no spaces please');
-				$('#urlhelp').html('Invalid url, correct format');
-				return false;				
 			} else {
-				//console.log(userUserName.value);
-				formData.push({name:'createroom', value: userUserName.value},{name:'memberslist', value: memberslist});
+				formData.push({name:'createroom', value: userUserName.value},{name:'memberslist', value: memberslist},{name:'address', value: formFields[1].val()});
 				return true;
 			}
 		},
 		success	: function(responseText, status, xhr, $form){
+            mixpanel.track('Room created', {
+                'page name': document.title,
+                'url': window.location.pathname,
+                'user': userUserName.value
+            });
 			if (status == 'success') onUpdateSuccess();
 		},
 		error : function(e){

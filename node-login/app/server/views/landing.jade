@@ -4,15 +4,17 @@ div(id='home_container')
 		h1
 		p#sub1.subheading Please tell us a little about yourself.
 		hr
-		h3
-			h3 Member
+		p
+			- for (var i = 0; i < roomsowned.length; i++)
+				a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name}	
+				<i class="icon-wrench"></i> 
+				br
 			- for (var i = 0; i < rooms.length; i++)
 				a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name} 
 				br
-			h3 Owned
-			- for (var i = 0; i < roomsowned.length; i++)
-				a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name} 
-				br
+		hr
+		<i class="icon-wrench"></i> You own those rooms
+
 
 // display form errors in a custom modal window //
 

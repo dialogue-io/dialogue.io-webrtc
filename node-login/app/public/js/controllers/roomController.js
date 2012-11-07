@@ -14,12 +14,6 @@ function roomController()
 // handle user settings //	
 	$('#link_nmps').click(function(){ that.attemptRoomNmps(); });
 	
-// confirm account deletion //	
-	$('#account-form-btn1').click(function(){$('.modal-confirm').modal('show')});	
-	
-// handle account deletion //	
-	$('.modal-confirm .submit').click(function(){ that.deleteAccount(); });
-	
 	this.deleteAccount = function()
 	{
 		$('.modal-confirm').modal('hide');
@@ -77,7 +71,7 @@ function roomController()
 		$('.modal-alert .modal-body p').html(msg);
 		$('.modal-alert').modal('show');
 		$('.modal-alert button').click(function(){window.location.href = '/';})
-		setTimeout(function(){window.location.href = '/';}, 3000);		
+		setTimeout(function(){window.location.href = '/';}, 1000);		
 	}
 }
 

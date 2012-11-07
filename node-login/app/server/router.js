@@ -4,6 +4,7 @@ var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
 var RM = require('./modules/room-manager');
 
+
 module.exports = function(app) {
 
 	app.dynamicHelpers({
@@ -70,15 +71,18 @@ module.exports = function(app) {
 			if (req.session.user.admin == "true") {
 				console.log('Admin is in: '+req.session.user.email);
 				AM.getAllRecords( function(e, accounts){
-					res.render('admin', {
-						locals: {
-							title : 'dialogue.io - Admin page',
-							countries : CT,
-							udata : req.session.user,
-							accts : accounts
-						}
+					RM.getAllRecords( function(e, roomslist) {
+						res.render('admin', {
+							locals: {
+								title : 'dialogue.io - Admin page',
+								countries : CT,
+								udata : req.session.user,
+								accts : accounts,
+								rooms : roomslist
+							}
+						});
 					});
-				})
+				});
 			} else {
 				res.redirect('/');
 			}
@@ -249,17 +253,15 @@ module.exports = function(app) {
 			res.clearCookie('pass');
 			req.session.destroy(function(e){ res.send('ok', 200); });
 		}	else if (req.param('createroom') != undefined){
-			/*console.log(req.param('name'));
-			console.log(req.param('address'));
-			console.log(req.param('token'));*/
-			//console.log(JSON.stringify(req.param('memberslist')));
 			//Converts the string of users to members in JSON format
+		    console.log(req.param('memberslist'));
 			RM.create({
 				name 	: req.param('name'),
 				address 	: req.param('address'),
 				token 	: req.param('token'),
 				owner	: req.param('createroom'),
 				members : req.param('memberslist'),
+				logs	: req.param('logs')
 			}, function(e, o){
 				if (e){
 					res.send(e, 400);
@@ -317,13 +319,98 @@ module.exports = function(app) {
 
 // Room for NMPS //
 
-	app.get('/room/*', function(req, res) {
-	    if (req.session.user == null){
+	//Handling logs
+
+	app.get('/room/:room/:option/:file'  , function(req, res) {
+		if (req.session.user == null){
+			// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+        } else if (req.params.option == 'logs') {
+        	//Check if user is member of the room, if not redirect to homepage and prohibit to access logfile
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
+	    		if (o.owner == req.session.user.user) {
+					res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+	    		} else {
+					RM.isMember(req.params.room.toLowerCase(), req.session.user.user, function(status){
+						//Not owner but member of the room
+						if (status == true) {
+							res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+						} else {
+					        res.redirect('/');
+						}
+					});    			
+	    		}
+	    	});
+	    }
+	});
+
+	app.get('/room/:room/:option'  , function(req, res) {
+		if (req.session.user == null){
+			// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+        } else if (req.params.option == 'settings') {
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
+	    		if (o.owner == req.session.user.user) {
+					res.render('settings_room', {
+						locals: {
+							title : o.name+' room settings - dialogue.io',
+							udata : req.session.user,
+							room : o
+						}
+					});
+	    		} else {
+			        res.redirect('/');			
+	    		}
+	    	});        	
+	    }
+	});
+
+	app.post('/room/:room/:option'  , function(req, res) {
+		if (req.session.user == null){
+			// if user is not logged-in redirect back to login page //
+	        res.redirect('/');
+        } else if (req.params.option == 'settings') {
+	        if (req.param('updateroom') != undefined){
+				//Converts the string of users to members in JSON format
+				RM.update({
+					name 	: req.param('name'),
+					address 	: req.param('address'),
+					token 	: req.param('token'),
+					owner	: req.param('updateroom'),
+					members : req.param('memberslist'),
+					logs	: req.param('logs')
+				}, function(e, o){
+					if (e){
+						res.send(e, 400);
+					}	else{
+						res.send('ok', 200);
+					}
+				});
+			}
+		} else if (req.params.option == 'delete') {
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
+	    		if (o.owner == req.session.user.user) {
+					RM.delete(req.param('id'), function(e, obj){
+						if (!e){
+							res.redirect('/');
+						}	else{
+							res.send('record not found', 400);
+						}
+					});
+	    		} else {
+			        res.redirect('/');			
+	    		}
+	    	});     
+		}
+	});
+
+	app.get('/room/:room', function(req, res) {
+		if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
 	    } else {
 	    	//Checks URL and saves the name of room in req.params[0]
-	    	RM.findByAddress(req.params[0].toLowerCase(),function(e,o){
+	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
 	    		if (o) {
 	    			if (o.owner == req.session.user.user) {
 						res.render('room', {
@@ -334,7 +421,7 @@ module.exports = function(app) {
 							}
 						});
 					} else {
-						RM.isMember(req.params[0].toLowerCase(), req.session.user.user, function(status){
+						RM.isMember(req.params.room.toLowerCase(), req.session.user.user, function(status){
 							//Not owner but member of the room
 							if (status == true) {
 								res.render('room', {
@@ -364,8 +451,7 @@ module.exports = function(app) {
 	    }
 	});
 
-
-	app.post('/room/*', function(req, res){
+	app.post('/room/:rooms', function(req, res){
 	// check if the user's credentials are saved in a cookie //
 		if (req.param('user') != undefined) {
 			AM.update({
@@ -398,7 +484,7 @@ module.exports = function(app) {
 				} else if(response == 'room-not-found') {
 					res.send('room-not-found',400);
 				} else if(response.address) {
-					res.redirect('/room/'+response.address);
+					res.send('ok', 200);
 				}
 			});
 		}
@@ -457,7 +543,7 @@ module.exports = function(app) {
 	
 	
 // view & delete accounts //
-	app.get('/print', function(req, res) {
+	/*app.get('/print', function(req, res) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
@@ -472,7 +558,7 @@ module.exports = function(app) {
 	//	AM.getAllRecords( function(e, accounts){
 	//		res.render('print', { locals: { title : 'Account List', accts : accounts } });
 	//	})
-	//});	
+	//});*/	
 	
 	app.post('/delete', function(req, res){
 		AM.delete(req.body.id, function(e, obj){

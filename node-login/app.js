@@ -15,7 +15,7 @@ var io = require('socket.io').listen(app);
 //io.enable('browser client minification');  // send minified client
 //io.enable('browser client etag');          // apply etag caching logic based on version number
 //io.enable('browser client gzip');          // gzip the file
-io.set('log level', 1);                    // reduce logging just production!!!!!
+//io.set('log level', 1);                    // reduce logging just production!!!!!
 io.set('transports', [                     // enable all transports (optional if you want flashsocket)
     'websocket'
   , 'flashsocket'
@@ -108,16 +108,14 @@ io.sockets.on('connection', function (socket) {
 		socket.room = info.room;
 		if (usernamesdb[info.room] == null || usernamesdb[info.room] == '') {
 			usernamesdb[info.room] = [];
-			//var tmp ={}; tmp[info.username]=info.username;
 			usernamesdb[info.room].push(info.username);
 		} else {
-			//var tmp ={}; tmp[info.username]=info.username;
 			usernamesdb[info.room].push(info.username);
 		}
 		//console.log(usernamesdb[info.room]);
 		//usernames[info.username]=info.username;
 		socket.join(info.room);
-		ids[info.username] = socket.id;
+		ids[info.username.split('@')[1].split(')')[0]] = socket.id;
 		//console.log(usernames);
 		io.sockets.in(socket.room).emit('updateusers', usernamesdb[info.room]);
 		ensureDir('./room/'+socket.room+'/logs/', 0755, function (err) {
@@ -181,13 +179,14 @@ io.sockets.on('connection', function (socket) {
 	});
 		
 	//Handling signalling messages
-	socket.on('signaling', function (message) {
+	socket.on('signaling', function (message,receiver,from) {
 		// we tell the client to execute 'updatechat' with 2 parameters
-		console.log("Signaling message to: "+message.to);
-		to_id = ids[message.to];
+		console.log("Signaling message to: "+receiver);
+		to_id = ids[receiver];
+		console.log(ids);
 		//console.log("Message: "+message.data);
 		//socket_to = sockets[to_id];
-		io.sockets.socket(ids[message.to]).emit('onSignaling',message);
+		io.sockets.socket(ids[receiver]).emit('onSignaling',message,from,receiver);
 	});
 
 	// when the user disconnects.. perform this
@@ -207,5 +206,8 @@ io.sockets.on('connection', function (socket) {
 		// echo globally that this client has left
 		io.sockets.in(socket.room).emit('disconnect',socket.username);
 		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
+	});
+});
+ ' has disconnected');
 	});
 });

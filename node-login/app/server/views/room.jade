@@ -64,9 +64,6 @@ head
             #logfiles
             script(type='text/javascript')
               mixpanel.track_links('#logfiles a', 'Logfile opened');
-        - if (room.features[1] == 1)
-          #footer
-          video#remoteVideo(width='100%', height='100%', autoplay='autoplay')
         .span9(style='height: 100%;')
           #chat(style='height: 80%; overflow: auto; overflow-x: hidden; margin: 2%; border: 1px solid #CCC; border-radius: 5px; background-color: white;')
             table.table.table-condensed(style="table-layout:fixed;")
@@ -79,15 +76,19 @@ head
         .span12(style='height: 90%;')
           .span4(style='max-width: 20%; height: 90%;')
           .span4.pagination-centered(style='min-width: 60%; height: 90%;')
-            #webcam
-              video#localVideo(height='240px;', autoplay='autoplay', onclick='mainWindow(this);', style='-webkit-transition: opacity 2s; -webkit-transform: scale(-1, 1); opacity: 1; margin-right: 3px; height: 90%;')
+            - if (room.features[1] == 1)
+              #webcam
+                video#localVideo(height='240px;', autoplay='autoplay', style='-webkit-transition: opacity 2s; -webkit-transform: scale(-1, 1); opacity: 1; margin-right: 3px; height: 90%;')
           .span4(style='max-width: 15%; height: 90%;')
-            #footer
-            #buttons
             #drop Drop
             .attachments-drop-zone
               .drop-zone-image
               .drop-zone-text Drop files here to attach them
+            - if (room.features[1] == 1)
+              #footer
+              #buttons
+                button.btn.audio(type='button', data-toggle='button') Audio
+                button.btn.video(type='button', data-toggle='button') Video
         .span12.pagination-centered(style='min-width: 100%;')
           p.lead(style='font-size: 14px;')
             a(href='https://tools.google.com/dlpage/chromesxs/', target='_blank') Chrome Canary 

@@ -42,11 +42,16 @@ $(document).ready(function(){
         }
         $('#data').focus();
 	}
-	
+
+    sendMessage = function(message,receiver,from) {
+      var msgString = JSON.stringify(message);
+      console.log('C->S: ' + msgString);
+      socket.emit('signaling', msgString, receiver,from);
+    }	
 	//Deppending on the feature array of bits we will deliver different features, chat, webrtc, datachan etc
 	//Starting chat code
-	//var socket = io.connect('http://localhost:8080');
-	var socket = io.connect('https://dialogue.io', {secure: true});
+	var socket = io.connect('http://localhost:8080');
+	//var socket = io.connect('https://dialogue.io', {secure: true});
 	var me;
 	//var Meeting = new Array();
 	var index = {};
@@ -84,7 +89,7 @@ $(document).ready(function(){
         if(total > 6) $('#logfiles').append('<a href="#logModal" role="button" data-toggle="modal">More...</a>');
 	});
 	socket.on('disconnect', function (username) {
-        if (Meeting[username]!= null) {
+        /*if (Meeting[username]!= null) {
 		    console.log(username + " has disconnected");
 		    try {
 		        d = document.getElementById("webcam");
@@ -94,7 +99,7 @@ $(document).ready(function(){
 		    } catch (e) {
 		        console.log("User not avaliable to remove " + e);
 		    }
-		}
+		}*/
 	});
 	// listener, whenever the server emits 'updatechat', this updates the chat body
 	socket.on('updatechat', function (username, data, sticky) {
@@ -137,34 +142,10 @@ $(document).ready(function(){
 	});
 
 	//Listener for incomming signaling messages
-	socket.on('onSignaling', function (message) {
-	    if ((Meeting[message.from] == undefined) || (Meeting[message.from] == null)) {
-	        console.log("Starting call with " + message.from);
-	        Meeting[message.from] = new RTCchan();
-	        Meeting[message.from].Answer();
-	        /*Meeting[message.from].setLocalVideo("localVideo", function (status) {
-	            if (status == true) {
-	                //Meeting[message.from].setLocalStream(globalLocalStream);
-	                Meeting[message.from].Answer(message.from, "webcam", function (status) {
-	                    if (status == true) {
-	                        addHangButton(message.from);
-	                        Meeting[message.from].onChannelMessage(message);
-	                    } else {
-	                        console.log("Error answering call");
-	                    }
-	                });
-	            } else {
-	                console.log("Error");
-	            }
-	        });*/
-	        Meeting[message.from].onChannelMessage(message);
-	        counter = counter + 1;
-	    } else if (Meeting[message.from]) {
-	        Meeting[message.from].onChannelMessage(message);
-	    } else {
-	        console.log("Unexpected error");
-	    }
+	socket.on('onSignaling', function (message,to,from) {
+		onSignaling(message,to,from);
 	});
+	
 	// listener, whenever the server emits 'updateusers', this updates the username list
 	socket.on('updateusers', function (data) {
 	    $('#users-body').empty();

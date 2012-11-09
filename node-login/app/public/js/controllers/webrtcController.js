@@ -1,41 +1,94 @@
 $(document).ready(function(){
 
+  /**
+    RTC library works calling it by:
+    var x = new RTCchan(to,from,div_for_video_tags);
+    x.Call();
+    x.Answer();
+    callback avaliables
+  */
+
   var Meeting = new Array();
+  //Listener for incomming signaling messages
+  onSignaling = function (message,to,from) {
+    if ((Meeting[to] == undefined) || (Meeting[to] == null)) {
+      //Call does not exist
+      Meeting[to] = new RTCchan(to,from,'webcam');
+      Meeting[to].Answer(function(status){
+        if (status ==true) {
+          Meeting[to].onChannelMessage(message);
+        }
+      });    
+    } else if (Meeting[to]) {
+        Meeting[to].onChannelMessage(message);
+    } else {
+        console.log("Unexpected error, message:" + message);
+    }    
+  }
 
   //Listener for calls
   $('#users-body').delegate( '.call', 'click', function(){
+    me=userUserName.value;
     id = $(this).attr('id').split('@')[1].split(')')[0];
-      if ((Meeting[id] == undefined) || (Meeting[id] == null)) {
-          console.log("Starting call to " + id);
-          Meeting[id] = new RTCchan(id,socket);
-          Meeting[id].Call();
-          /*Meeting[id].setLocalVideo("localVideo", function (status) {
-              if (status == true) {
-                  //Meeting[id].setLocalStream(globalLocalStream);
-                  Meeting[id].Call(id, "webcam", function (status) {
-                      if (status == false) {
-                          alert("Call error!");
-                      } else {
-                          addHangButton(id);
-                      }
-                  });
-              } else {
-                  console.log("Error");
-              }
-          });*/
-      }   
+    if ((Meeting[id] == undefined) || (Meeting[id] == null)) {
+        /*createTag(id,function(status){
+          if (status == true){*/
+            //DOM created
+            console.log("Starting call to " + id);
+            Meeting[id] = new RTCchan(id,me,'webcam');
+            Meeting[id].Call();            
+          /*} else {
+            //Failed to build video tag and call
+            alert('Error in call, your browser might be outdated!');
+          }
+        })*/
+    }   
   });
 
-  function RTCchan(receiver,socket){
 
+  //Mute all video/audio outgoing PC, works with a toggle class audio!
+  $('.audio').click(function(){
+    console.log("audio toggle");
+    if($(this).hasClass('active')){
+      console.log('audio');
+      for (var i in Meeting) {
+        Meeting[i].setAudioStatus(true);
+      }
+    } else {
+      console.log('no audio');
+      for (var i in Meeting) {
+        Meeting[i].setAudioStatus(false);
+      }
+    }
+  });
+
+  $('.video').click(function(){
+    console.log("video toggle");
+    if($(this).hasClass('active')){
+      console.log('videop');
+      for (var i in Meeting) {
+        Meeting[i].setVideoStatus(true);
+      }
+    } else {
+      console.log('no video');
+      for (var i in Meeting) {
+        Meeting[i].setVideoStatus(false);
+      }
+    }
+  });
+
+  RTCchan = function(receiver,from,div){
+    this.div = div;
+    this.from = from;
+    this.receiver = receiver;
+    var started = false;
+    var localStream;
     var localVideo;
     var miniVideo;
     var remoteVideo;
-    var localStream;
     var remoteStream;
     var pc;
     var initiator = 0;
-    var started = false;
     var isRTCPeerConnection = true;
     var mediaConstraints = {
        'has_audio': true,
@@ -44,20 +97,65 @@ $(document).ready(function(){
     var isVideoMuted = false;
     var isAudioMuted = false;
 
-    RTCchan.prototype.Call = function(){
-        localVideo = document.getElementById("localVideo");
-       //First manage to get the remotevideo element to work
-       remoteVideo = document.getElementById("remoteVideo");
-       initiator = 1;
-       resetStatus();
-       getUserMedia();    
+
+    this.setAudioStatus = function(status){
+      isAudioMuted = status;
+      toggleAudioMute();
     }
 
-    RTCchan.prototype.Answer = function(){
-       //First manage to get the remotevideo element to work
-       remoteVideo = document.getElementById("remoteVideo");
-       resetStatus();
-       getUserMedia();    
+    this.setVideoStatus = function(status){
+      isVideoMuted = status;
+      toggleVideoMute();
+    }
+
+    this.Call = function(callback){
+     setLocalVideo('localVideo', function(status){
+        if (status == true) {
+          setRemoteVideo(receiver,function(status){
+            if (status == true) {
+               initiator = 1;
+               resetStatus();
+               getUserMedia(); 
+            } else {
+              //Build remotevideo tag
+              return false;
+            }
+          });
+        } else {
+          //Create local video tag
+          return false;
+        }
+     });
+    }
+
+    this.Answer = function(callback){
+     setLocalVideo('localVideo', function(status){
+        if (status == true) {
+          setRemoteVideo(receiver,function(status){
+            if (status == true) {
+               resetStatus();
+               getUserMedia(function(status){
+                if (status == true) {
+                  callback(true);
+                }
+               });
+            } else {
+              //Build remotevideo tag
+              return false;
+            }
+          });
+        } else {
+          //Create local video tag
+          return false;
+        }
+     });
+    }
+    
+    //When incomming message from websocket this function will process it into the PC
+    this.onChannelMessage = function(message) {
+       console.log('S->C: ' + message);
+       if (isRTCPeerConnection) processSignalingMessage(message);
+       else processSignalingMessage00(message);
     }
 
     function initialize() {
@@ -65,6 +163,19 @@ $(document).ready(function(){
        resetStatus();
        getUserMedia();
     }
+
+    //Get element from DOM
+    function getElement(input,callback) {
+        //console.log("Getting element form DOM: "+input);
+        var element;
+        if (typeof input === 'string') {
+                //element = document.getElementById(input) || document.getElementsByTagName( input )[0];
+                element = document.getElementById(input);
+        } else if (!input) {
+                callback(false);
+        }
+        callback(element);
+    };
 
     function resetStatus() {
        if (!initiator) {
@@ -75,17 +186,37 @@ $(document).ready(function(){
     }
 
     //Getting access to the media
-    function getUserMedia() {
+    function getUserMedia(callback) {
        try {
            navigator.webkitGetUserMedia({
                'audio': true,
                'video': true
-           }, onUserMediaSuccess,
+           }, function(stream) {
+                   console.log("User has granted access to local media.");
+                   var url = webkitURL.createObjectURL(stream);
+                   localVideo.style.opacity = 1;
+                   localVideo.src = url;
+                   localStream = stream;
+                   // Caller creates PeerConnection.
+                   if (initiator) maybeStart();
+                   if (callback)
+                          callback(true);
+                          },
            onUserMediaError);
            console.log("Requested access to local media with new syntax.");
        } catch (e) {
            try {
-               navigator.webkitGetUserMedia("video,audio", onUserMediaSuccess,
+               navigator.webkitGetUserMedia("video,audio", function(stream) {
+                   console.log("User has granted access to local media.");
+                   var url = webkitURL.createObjectURL(stream);
+                   localVideo.style.opacity = 1;
+                   localVideo.src = url;
+                   localStream = stream;
+                   // Caller creates PeerConnection.
+                   if (initiator) maybeStart();
+                   if (callback)
+                    callback(true);
+                    },
                onUserMediaError);
                console.log("Requested access to local media with old syntax.");
            } catch (e) {
@@ -165,7 +296,7 @@ $(document).ready(function(){
            sendMessage({
                type: 'offer',
                sdp: offer.toSdp()
-           });
+           },receiver,from);
            pc.startIce();
        }
     }
@@ -181,25 +312,78 @@ $(document).ready(function(){
            sendMessage({
                type: 'answer',
                sdp: answer.toSdp()
-           });
+           },receiver,from);
            pc.startIce();
        }
     }
 
+    setRemoteVideo = function(tag,callback) {
+      getElement(tag, function(element){
+        if (element==false || element == null) {
+          console.log("No DOM "+tag+" found");
+          //remoteVideo = null;
+          var _div = document.getElementById(div);
+          remoteVideo = document.createElement("video");
+          remoteVideo.setAttribute("id",'video_'+tag);
+          remoteVideo.setAttribute("autoplay","autoplay");
+          remoteVideo.setAttribute("style","-webkit-transition: opacity 2s; opacity: 1; margin-right: 3px; height:90%;");
+          remoteVideo.setAttribute("height","240px");
+          remoteVideo.setAttribute("onclick","mainWindow(this)");
+          _div.appendChild(remoteVideo);
+          console.log("remoteVideo configuration finished, waiting for call");
+          callback(true);
+        } else {
+          console.log("remote video set");
+          remoteVideo = element;
+          callback(true);
+        }
+      });
+    };
+
+    setLocalVideo = function(tag,callback) {
+      getElement(tag, function(element){
+        if (element==false || element == null) {
+          console.log("No DOM "+tag+" found");
+          //remoteVideo = null;
+          var _div = document.getElementById(div);
+          localVideo = document.createElement("video");
+          localVideo.setAttribute("id",tag);
+          localVideo.setAttribute("autoplay","autoplay");
+          localVideo.setAttribute("style","-webkit-transition: opacity 2s; -webkit-transform: scale(-1, 1); opacity: 1; margin-right: 3px; height:90%;");
+          localVideo.setAttribute("height","240px");
+          localVideo.setAttribute("onclick","mainWindow(this)");
+          _div.appendChild(localVideo);
+          console.log("remoteVideo configuration finished, waiting for call");
+          callback(true);
+        } else {
+          localVideo = element;
+          console.log("Local video set");
+          callback(true);
+        }
+      });
+    };
+
+    function getElement(input,callback) {
+        //console.log("Getting element form DOM: "+input);
+        var element;
+        if (typeof input === 'string') {
+                //element = document.getElementById(input) || document.getElementsByTagName( input )[0];
+                element = document.getElementById(input);
+                        console.log(input);
+
+        } else if (!input) {
+                callback(false);
+        }
+        callback(element);
+    };
+   
     function setLocalAndSendMessage(sessionDescription) {
        pc.setLocalDescription(sessionDescription);
-       sendMessage(sessionDescription);
-    }
-
-    function sendMessage(message) {
-      var msgString = JSON.stringify(message);
-      console.log('C->S: ' + msgString);
-      socket.emit('signalling', msgString, receiver);
+       sendMessage(sessionDescription,receiver,from);
     }
 
     function processSignalingMessage(message) {
        var msg = JSON.parse(message);
-
        if (msg.type === 'offer') {
            // Callee creates PeerConnection
            if (!initiator && !started) maybeStart();
@@ -236,14 +420,6 @@ $(document).ready(function(){
        }
     }
 
-    //When incomming message from websocket this function will process it into the PC
-    function onChannelMessage(message) {
-       console.log('S->C: ' + message.data);
-       if (isRTCPeerConnection) processSignalingMessage(message.data);
-       else processSignalingMessage00(message.data);
-    }
-
-
     function onUserMediaError(error) {
        console.log("Failed to get access to local media. Error code was " + error.code);
        alert("Failed to get access to local media. Error code was " + error.code + ".");
@@ -256,7 +432,7 @@ $(document).ready(function(){
                label: event.candidate.sdpMLineIndex,
                id: event.candidate.sdpMid,
                candidate: event.candidate.candidate
-           });
+           },receiver,from);
        } else {
            console.log("End of candidates.");
        }
@@ -268,7 +444,7 @@ $(document).ready(function(){
                type: 'candidate',
                label: candidate.label,
                candidate: candidate.toSdp()
-           });
+           },receiver,from);
        }
 
        if (!moreToFollow) {
@@ -287,10 +463,9 @@ $(document).ready(function(){
     function onRemoteStreamAdded(event) {
        console.log("Remote stream added.");
        var url = webkitURL.createObjectURL(event.stream);
-       //miniVideo.src = localVideo.src;
        remoteVideo.src = url;
        remoteStream = event.stream;
-       //waitForRemoteVideo();
+       waitForRemoteVideo();
     }
 
     function onRemoteStreamRemoved(event) {
@@ -299,7 +474,7 @@ $(document).ready(function(){
 
     function onHangup() {
        console.log("Hanging up.");
-       transitionToDone();
+       //transitionToDone();
        stop();
     }
 
@@ -311,17 +486,24 @@ $(document).ready(function(){
     }
 
     function stop() {
+      setStatus("Hanging up...");
+      remoteVideo.style.opacity = 0;
+      remoteVideo.src = null;
+      var _div = document.getElementById(div);
+      _div.removeChild(remoteVideo);
        started = false;
        isRTCPeerConnection = true;
        isAudioMuted = false;
        isVideoMuted = false;
        pc.close();
        pc = null;
+      initiator = 0;
+      setStatus("");
     }
 
     function waitForRemoteVideo() {
        if (remoteStream.videoTracks.length === 0 || remoteVideo.currentTime > 0) {
-           transitionToActive();
+         setStatus("");         
        } else {
            setTimeout(waitForRemoteVideo, 100);
        }
@@ -409,7 +591,7 @@ $(document).ready(function(){
     window.onbeforeunload = function () {
        sendMessage({
            type: 'bye'
-       });
+       },receiver,from);
     }
 
     // Ctrl-D: toggle audio mute; Ctrl-E: toggle video mute.

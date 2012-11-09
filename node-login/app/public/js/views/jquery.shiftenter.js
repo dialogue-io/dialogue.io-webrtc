@@ -35,7 +35,7 @@
             settings: {
                 focusClass: 'shiftenter',
                 inactiveClass: 'shiftenterInactive',
-                hint: 'Shift+Enter for line break and /url:address for link',
+                hint: 'Shift+Enter for line break',
                 metaKey: 'shift',     // Meta key that triggers a line-break, allowed values: 'shift', 'ctrl'
                 pseudoPadding: '0 10' // Pseudo-padding to work around webkit/firefox4 resize handler being hidden, follows the CSS padding style
             },

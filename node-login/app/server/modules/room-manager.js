@@ -48,7 +48,7 @@ RM.create = function(newData, callback)
 				if (o){
 					callback('address-taken');
 				}	else{
-					newData.features = [1,0,0,0,0];
+					newData.features = [1,1,0,0,0];
 					RM.saltAndHash(newData.token, function(hash){
 						newData.token = hash;
 						newData.lastaccess = "";
@@ -180,10 +180,12 @@ RM.isMember = function(address, member, callback)
 	RM.rooms.findOne({address:address}, function(e, o) {
 		if (o){
 			toggle = null;
-			for (i=0; i<o.members.length; i++) {
-				if (o.members[i] == member) {
-					toggle = true;
-					callback(true);
+			if (o.members != null) {
+				for (i=0; i<o.members.length; i++) {
+					if (o.members[i] == member) {
+						toggle = true;
+						callback(true);
+					}
 				}
 			}
 			if (toggle != true) callback(false);
@@ -213,7 +215,13 @@ RM.checkToken = function(address, token, member, callback)
 				if (res) {
 					//Token checked and user added to the room
 					console.log(member);
-					o.members.push(member);
+					if (o.memberslist == null) {
+						var memberslist = [];
+						memberslist.push(member);
+						o.members = memberslist;
+					} else {
+						o.members.push(member);
+					}
 					//console.log(o.members+' '+member);
 					RM.rooms.save(o, callback(o));
 					//RM.accounts.save(o);

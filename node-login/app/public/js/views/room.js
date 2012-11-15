@@ -46,8 +46,14 @@ $(document).ready(function(){
     sendMessage = function(message,receiver,from) {
       var msgString = JSON.stringify(message);
       console.log('C->S: ' + msgString);
-      socket.emit('signaling', msgString, receiver,from);
+      socket.emit('signaling', msgString, receiver,from,roomAddress.value);
     }	
+
+    sendConference = function(message) {
+      var msgString = message;
+      socket.emit('conference', msgString);
+    }
+    	
 	//Deppending on the feature array of bits we will deliver different features, chat, webrtc, datachan etc
 	//Starting chat code
 	var socket = io.connect('http://localhost:8080');
@@ -71,6 +77,18 @@ $(document).ready(function(){
 	    //}
 	    //});
 	});
+
+	socket.on('makeCall', function (id) {
+        $('.groupCall').attr('disabled', true);
+        $('.webrtc_checkbox').attr('disabled', true);
+        $('.webrtc_checkbox').each( function() {
+        	if($(this).val().split('@')[1].split(')')[0]==id)
+            $(this).prop('checked', true);
+        });
+		makeCall(userUserName.value,id);
+		//Start webrtc call to other peers
+	});
+
 	socket.on('logfiles', function (logs) {
 	    //Updates the list of logfiles avaliable for download
 	    $('#logfiles').empty();
@@ -153,7 +171,7 @@ $(document).ready(function(){
 	        if (value == me) {
 	            $('#users-body').append('<tr><td id="' + userName.value + '"><h4 style="font-size: 13px;">' + userName.value + ' (me)</h4></td></tr>');
 	        } else {
-	            $('#users-body').append('<tr><td id="' + value + '"><a id="' + value + '" class="call"><h4 style="font-size: 13px;">' + value + '</h4></a></td></tr>');
+	            $('#users-body').append('<tr><td id="' + value + '"> <h4 style="font-size: 13px;"><input type="checkbox" value="'+value+'" id="inlineCheckbox" class="webrtc_checkbox"> '+value+'</h4></td></tr>');
 	        }
 	    });
 	});

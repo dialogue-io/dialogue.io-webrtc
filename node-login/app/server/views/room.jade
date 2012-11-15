@@ -59,12 +59,14 @@ head
           h2 Users
           table.table-condensed
             tbody#users-body
+          - if (room.features[1] == 1)
+            button.btn.btn-small.btn-primary(type='button', class="groupCall") Group call
           - if (room.logs == 'on')
             h2 Logs
             #logfiles
             script(type='text/javascript')
               mixpanel.track_links('#logfiles a', 'Logfile opened');
-        .span9(style='height: 100%;')
+        #chatspan.span9(style='height: 100%;')
           #chat(style='height: 80%; overflow: auto; overflow-x: hidden; margin: 2%; border: 1px solid #CCC; border-radius: 5px; background-color: white;')
             table.table.table-condensed(style="table-layout:fixed;")
               tbody#chat-body

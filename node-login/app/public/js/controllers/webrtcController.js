@@ -8,9 +8,13 @@ $(document).ready(function(){
     callback avaliables
   */
 
+  var groupCall = {room:roomAddress.value,participants:[]};
   var Meeting = new Array();
-  //Listener for incomming signaling messages
+  var calls = 0;
+  /*//Listener for incomming signaling messages
   onSignaling = function (message,to,from) {
+    $('#chatspan').addClass('span4');
+    $('#chatspan').removeClass('span9');
     if ((Meeting[to] == undefined) || (Meeting[to] == null)) {
       //Call does not exist
       Meeting[to] = new RTCchan(to,from,'webcam');
@@ -25,37 +29,99 @@ $(document).ready(function(){
         console.log("Unexpected error, message:" + message);
     }    
   }
-
   //Listener for calls
   $('#users-body').delegate( '.call', 'click', function(){
+    //$('#chatspan').addClass('span4');
+    //$('#chatspan').removeClass('span9');
     me=userUserName.value;
     id = $(this).attr('id').split('@')[1].split(')')[0];
     if ((Meeting[id] == undefined) || (Meeting[id] == null)) {
-        /*createTag(id,function(status){
-          if (status == true){*/
-            //DOM created
             console.log("Starting call to " + id);
             Meeting[id] = new RTCchan(id,me,'webcam');
             Meeting[id].Call();            
-          /*} else {
-            //Failed to build video tag and call
-            alert('Error in call, your browser might be outdated!');
-          }
-        })*/
     }   
+  });*/
+  //var Meeting = {};
+
+
+  //JSON object for the meeting group with three calls
+  onSignaling = function (message,to,from) {
+    //$('#chatspan').addClass('span4');
+    //$('#chatspan').removeClass('span9');
+    if ((Meeting[to] == undefined) || (Meeting[to] == null)) {
+      var msg = JSON.parse(message);
+      if (msg.type == "bye") {
+        Meeting[to]=null;
+      } else {
+        //Call does not exist
+        $('.groupCall').attr('disabled', true);
+        $('.webrtc_checkbox').attr('disabled', true);
+        $('.webrtc_checkbox').each( function() {
+          if($(this).val().split('@')[1].split(')')[0]==to)
+            $(this).prop('checked', true);
+        });
+        Meeting[to] = new RTCchan(to,from,'webcam');
+        Meeting[to].Answer(function(status){
+          if (status ==true) {
+            calls++;
+            Meeting[to].onChannelMessage(message);
+          }
+        });
+      }
+    } else if (Meeting[to]) {
+        Meeting[to].onChannelMessage(message);
+        var msg = JSON.parse(message);
+        if (msg.type == "bye") {
+          Meeting[to]=null;
+          calls = calls - 1;
+          if (calls == 0) {
+            clean();
+          }
+        }
+    } else {
+        console.log("Unexpected error, message:" + message);
+    }
+  }
+
+  clean = function(){
+    $('.webrtc_checkbox:checked').each(function(index) {
+      $('.groupCall').attr('disabled', false);
+      $('.webrtc_checkbox').attr('disabled', false);
+      $('.webrtc_checkbox').attr('checked', false);
+    });      
+  }
+
+  //Listener for calls
+  $('.groupCall').click(function(){
+    me=userUserName.value;
+    //4 is the maximum amount of participants for the call, can be modified, indicates the amount of peerconn
+    if (($('.webrtc_checkbox:checked').length < 4) && ($('.webrtc_checkbox:checked').length >= 1)) {
+      $('.webrtc_checkbox:checked').each(function(index) {
+        $('.groupCall').attr('disabled', true);
+        $('.webrtc_checkbox').attr('disabled', true);
+        id = $(this).attr('value').split('@')[1].split(')')[0];
+        console.log(id);
+        makeCall(me,id);
+      });
+      sendConference(groupCall);
+      //console.log(JSON.stringify(groupCall.room));
+    }
   });
 
+  makeCall = function(me,id) {
+    groupCall.participants.push({user:id});
+    calls++;
+    Meeting[id] = new RTCchan(id,me,'webcam');
+    Meeting[id].Call();   
+  }
 
   //Mute all video/audio outgoing PC, works with a toggle class audio!
   $('.audio').click(function(){
-    console.log("audio toggle");
     if($(this).hasClass('active')){
-      console.log('audio');
       for (var i in Meeting) {
         Meeting[i].setAudioStatus(true);
       }
     } else {
-      console.log('no audio');
       for (var i in Meeting) {
         Meeting[i].setAudioStatus(false);
       }
@@ -63,14 +129,11 @@ $(document).ready(function(){
   });
 
   $('.video').click(function(){
-    console.log("video toggle");
     if($(this).hasClass('active')){
-      console.log('videop');
       for (var i in Meeting) {
         Meeting[i].setVideoStatus(true);
       }
     } else {
-      console.log('no video');
       for (var i in Meeting) {
         Meeting[i].setVideoStatus(false);
       }
@@ -163,19 +226,6 @@ $(document).ready(function(){
        resetStatus();
        getUserMedia();
     }
-
-    //Get element from DOM
-    function getElement(input,callback) {
-        //console.log("Getting element form DOM: "+input);
-        var element;
-        if (typeof input === 'string') {
-                //element = document.getElementById(input) || document.getElementsByTagName( input )[0];
-                element = document.getElementById(input);
-        } else if (!input) {
-                callback(false);
-        }
-        callback(element);
-    };
 
     function resetStatus() {
        if (!initiator) {
@@ -320,7 +370,7 @@ $(document).ready(function(){
     setRemoteVideo = function(tag,callback) {
       getElement(tag, function(element){
         if (element==false || element == null) {
-          console.log("No DOM "+tag+" found");
+          //console.log("No DOM "+tag+" found");
           //remoteVideo = null;
           var _div = document.getElementById(div);
           remoteVideo = document.createElement("video");
@@ -330,10 +380,9 @@ $(document).ready(function(){
           remoteVideo.setAttribute("height","240px");
           remoteVideo.setAttribute("onclick","mainWindow(this)");
           _div.appendChild(remoteVideo);
-          console.log("remoteVideo configuration finished, waiting for call");
           callback(true);
         } else {
-          console.log("remote video set");
+          //console.log("remote video set");
           remoteVideo = element;
           callback(true);
         }
@@ -343,7 +392,7 @@ $(document).ready(function(){
     setLocalVideo = function(tag,callback) {
       getElement(tag, function(element){
         if (element==false || element == null) {
-          console.log("No DOM "+tag+" found");
+          //console.log("No DOM "+tag+" found");
           //remoteVideo = null;
           var _div = document.getElementById(div);
           localVideo = document.createElement("video");
@@ -353,11 +402,10 @@ $(document).ready(function(){
           localVideo.setAttribute("height","240px");
           localVideo.setAttribute("onclick","mainWindow(this)");
           _div.appendChild(localVideo);
-          console.log("remoteVideo configuration finished, waiting for call");
           callback(true);
         } else {
           localVideo = element;
-          console.log("Local video set");
+          //console.log("Local video set");
           callback(true);
         }
       });
@@ -369,8 +417,6 @@ $(document).ready(function(){
         if (typeof input === 'string') {
                 //element = document.getElementById(input) || document.getElementsByTagName( input )[0];
                 element = document.getElementById(input);
-                        console.log(input);
-
         } else if (!input) {
                 callback(false);
         }

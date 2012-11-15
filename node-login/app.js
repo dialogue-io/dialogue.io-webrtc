@@ -115,7 +115,7 @@ io.sockets.on('connection', function (socket) {
 		//console.log(usernamesdb[info.room]);
 		//usernames[info.username]=info.username;
 		socket.join(info.room);
-		ids[info.username.split('@')[1].split(')')[0]] = socket.id;
+		ids[info.username.split('@')[1].split(')')[0]+info.room] = socket.id;
 		//console.log(usernames);
 		io.sockets.in(socket.room).emit('updateusers', usernamesdb[info.room]);
 		ensureDir('./room/'+socket.room+'/logs/', 0755, function (err) {
@@ -179,14 +179,31 @@ io.sockets.on('connection', function (socket) {
 	});
 		
 	//Handling signalling messages
-	socket.on('signaling', function (message,receiver,from) {
+	socket.on('signaling', function (message,receiver,from,room) {
 		// we tell the client to execute 'updatechat' with 2 parameters
-		console.log("Signaling message to: "+receiver);
-		to_id = ids[receiver];
+		console.log("Signaling message to: "+receiver+room);
+		to_id = ids[receiver+room];
 		console.log(ids);
 		//console.log("Message: "+message.data);
 		//socket_to = sockets[to_id];
-		io.sockets.socket(ids[receiver]).emit('onSignaling',message,from,receiver);
+		io.sockets.socket(ids[receiver+room]).emit('onSignaling',message,from,receiver);
+	});
+
+	//Handling signalling messages
+	socket.on('conference', function (data) {
+		// we tell the client to execute 'updatechat' with 2 parameters
+		//msg = JSON.stringify(data);
+		console.log("New conference: "+data.room+data.participants.length);
+		counter = data.participants.length;
+		console.log(counter);
+		if ((counter > 1) && (counter <4)) {
+			for (i = 1; i < counter; i++) {
+				//Send call to the actual for the rest
+				io.sockets.socket(ids[data.participants[i-1].user+data.room]).emit('makeCall',data.participants[i].user);
+				for (z = i+1; z < counter; z++)
+				io.sockets.socket(ids[data.participants[i-1].user+data.room]).emit('makeCall',data.participants[z].user);
+			}
+		} 
 	});
 
 	// when the user disconnects.. perform this
@@ -200,14 +217,11 @@ io.sockets.on('connection', function (socket) {
 		}
 		//console.log(userlist[0]);
 		//delete usernamesdb[socket.room][socket.username];
-		delete ids[socket.username];
+		delete ids[socket.username+socket.room];
 		// update list of users in chat, client-side
 		io.sockets.in(socket.room).emit('updateusers', usernamesdb[socket.room]);
 		// echo globally that this client has left
 		io.sockets.in(socket.room).emit('disconnect',socket.username);
 		//socket.broadcast.emit('updatechat', '', socket.username + ' has disconnected');
-	});
-});
- ' has disconnected');
 	});
 });

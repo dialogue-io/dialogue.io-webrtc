@@ -339,9 +339,11 @@ $(document).ready(function(){
     function doCall() {
        console.log("Sending offer to peer.");
        if (isRTCPeerConnection) {
-           pc.createOffer(setLocalAndSendMessage, null, mediaConstraints);
+           //pc.createOffer(setLocalAndSendMessage, null, mediaConstraints);
+          pc.createOffer(setLocalAndSendMessage);
        } else {
-           var offer = pc.createOffer(mediaConstraints);
+           //var offer = pc.createOffer(mediaConstraints);
+           var offer = pc.createOffer();
            pc.setLocalDescription(pc.SDP_OFFER, offer);
            sendMessage({
                type: 'offer',
@@ -354,10 +356,12 @@ $(document).ready(function(){
     function doAnswer() {
        console.log("Sending answer to peer.");
        if (isRTCPeerConnection) {
-           pc.createAnswer(setLocalAndSendMessage, null, mediaConstraints);
+           //pc.createAnswer(setLocalAndSendMessage, null, mediaConstraints);
+           pc.createAnswer(setLocalAndSendMessage);
        } else {
            var offer = pc.remoteDescription;
-           var answer = pc.createAnswer(offer.toSdp(), mediaConstraints);
+           //var answer = pc.createAnswer(offer.toSdp(), mediaConstraints);
+           var answer = pc.createAnswer(offer.toSdp());
            pc.setLocalDescription(pc.SDP_ANSWER, answer);
            sendMessage({
                type: 'answer',

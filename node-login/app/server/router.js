@@ -1,8 +1,8 @@
 
-var CT = require('./modules/country-list');
-var AM = require('./modules/account-manager');
-var EM = require('./modules/email-dispatcher');
-var RM = require('./modules/room-manager');
+var CT = require(__dirname+'/modules/country-list');
+var AM = require(__dirname+'/modules/account-manager');
+var EM = require(__dirname+'/modules/email-dispatcher');
+var RM = require(__dirname+'/modules/room-manager');
 
 
 module.exports = function(app) {
@@ -254,7 +254,7 @@ module.exports = function(app) {
 			req.session.destroy(function(e){ res.send('ok', 200); });
 		}	else if (req.param('createroom') != undefined){
 			//Converts the string of users to members in JSON format
-		    console.log(req.param('memberslist'));
+		    //console.log(req.param('memberslist'));
 			RM.create({
 				name 	: req.param('name'),
 				address 	: req.param('address'),
@@ -327,14 +327,16 @@ module.exports = function(app) {
 	        res.redirect('/');
         } else if (req.params.option == 'logs') {
         	//Check if user is member of the room, if not redirect to homepage and prohibit to access logfile
-	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
+		//console.log("searching for file in "+require('path').dirname(require.main.filename));
+	    	home_dir = require('path').dirname(require.main.filename);
+		RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
 	    		if (o.owner == req.session.user.user) {
-					res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+					res.sendfile(home_dir+'/room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
 	    		} else {
 					RM.isMember(req.params.room.toLowerCase(), req.session.user.user, function(status){
 						//Not owner but member of the room
 						if (status == true) {
-							res.sendfile('./room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
+							res.sendfile(home_dir+'/room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
 						} else {
 					        res.redirect('/');
 						}

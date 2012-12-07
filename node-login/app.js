@@ -15,7 +15,7 @@ var io = require('socket.io').listen(app);
 //io.enable('browser client minification');  // send minified client
 //io.enable('browser client etag');          // apply etag caching logic based on version number
 //io.enable('browser client gzip');          // gzip the file
-//io.set('log level', 1);                    // reduce logging just production!!!!!
+io.set('log level', 1);                    // reduce logging just production!!!!!
 io.set('transports', [                     // enable all transports (optional if you want flashsocket)
     'websocket'
   , 'flashsocket'
@@ -40,11 +40,11 @@ app.dynamicHelpers({
 
 global.host = 'localhost';
 
-require('./app/config')(app, exp);
-require('./app/server/router')(app);
+require(__dirname+'/app/config')(app, exp);
+require(__dirname+'/app/server/router')(app);
 
 //Database access
-var RM = require('./app/server/modules/room-manager');
+var RM = require(__dirname+'/app/server/modules/room-manager');
 
 var clientID = 1;
 
@@ -118,13 +118,13 @@ io.sockets.on('connection', function (socket) {
 		ids[info.username.split('@')[1].split(')')[0]+info.room] = socket.id;
 		//console.log(usernames);
 		io.sockets.in(socket.room).emit('updateusers', usernamesdb[info.room]);
-		ensureDir('./room/'+socket.room+'/logs/', 0755, function (err) {
+		ensureDir(__dirname+'/room/'+socket.room+'/logs/', 0755, function (err) {
 			if(err) return next(err);
 			try {
-				fs.exists('room/'+socket.room+'/logs/'+date.toDateString()+'.html', function (exists) {
+				fs.exists(__dirname+'/room/'+socket.room+'/logs/'+date.toDateString()+'.html', function (exists) {
 					if (exists == true) {
 						//The file does exist
-						var input = fs.createReadStream('room/'+socket.room+'/logs/'+date.toDateString()+'.html');
+						var input = fs.createReadStream(__dirname+'/room/'+socket.room+'/logs/'+date.toDateString()+'.html');
 						var file = true;
 						function func(data) {
 							console.log(data.split('</strong>')[1]);
@@ -138,7 +138,7 @@ io.sockets.on('connection', function (socket) {
 				console.log(e);
 			}
 			try {
-				walk(process.cwd()+'/room/'+info.room+'/logs/', function(err, results) {
+				walk(__dirname+'/room/'+info.room+'/logs/', function(err, results) {
 				  if (err) throw err;
 				  io.sockets.emit('logfiles', results);
 				});
@@ -160,7 +160,7 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.in(socket.room).emit('updatechat', socket.username.split('(')[0], data);
 		RM.checkLogs(socket.room, function(status){
 			if (status == true) {
-				var log = fs.createWriteStream('room/'+socket.room+'/logs/'+date.toDateString()+'.html', {'flags': 'a'});
+				var log = fs.createWriteStream(__dirname+'/room/'+socket.room+'/logs/'+date.toDateString()+'.html', {'flags': 'a'});
 		        log.write("- <strong>"+socket.username.split('(')[0]+"["+hours+":"+minutes+"]:</strong> "+data+"<br>\n");
 			}
 		});

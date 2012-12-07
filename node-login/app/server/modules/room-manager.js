@@ -14,7 +14,7 @@ var dbName = 'Dialoguedb';
 var moment = require('moment');
 
 var RM = {}; 
-	RM.db = new Db(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}, {}));
+	RM.db = new Db(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}, {}), {safe:false});
 	RM.db.open(function(e, d){
 		RM.db.authenticate('dialogue', 'dialogue-webrtc', function(err2,data2){
 			if (e || err2) {

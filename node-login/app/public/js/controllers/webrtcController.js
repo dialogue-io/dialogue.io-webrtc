@@ -294,7 +294,7 @@ $(document).ready(function(){
     function createPeerConnection() {
        var pc_config = {
            "iceServers": [{
-               "url": "stun:dialogue.io:3478"
+               "url": "stun:stun.fwdnet.net"
            }]
        };
        try {

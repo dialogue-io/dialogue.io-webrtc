@@ -1,0 +1,10 @@
+#!monit
+set logfile /var/log/dialogue_monit.log
+
+check process nodejs with pidfile "/var/run/dialogue.pid"
+    start program = "/sbin/start dialogue"
+    stop program  = "/sbin/stop dialogue"
+    if failed port 8000 protocol HTTP
+        request /
+        with timeout 10 seconds
+        then restart

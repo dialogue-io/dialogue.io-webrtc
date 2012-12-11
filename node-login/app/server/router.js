@@ -4,6 +4,7 @@ var AM = require(__dirname+'/modules/account-manager');
 var EM = require(__dirname+'/modules/email-dispatcher');
 var RM = require(__dirname+'/modules/room-manager');
 
+var home_dir = require('path').dirname(require.main.filename);
 
 module.exports = function(app) {
 
@@ -328,7 +329,6 @@ module.exports = function(app) {
         } else if (req.params.option == 'logs') {
         	//Check if user is member of the room, if not redirect to homepage and prohibit to access logfile
 		//console.log("searching for file in "+require('path').dirname(require.main.filename));
-	    	home_dir = require('path').dirname(require.main.filename);
 		RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
 	    		if (o.owner == req.session.user.user) {
 					res.sendfile(home_dir+'/room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
@@ -561,7 +561,13 @@ module.exports = function(app) {
 	//		res.render('print', { locals: { title : 'Account List', accts : accounts } });
 	//	})
 	//});*/	
-	
+
+	//Stats rendering
+	app.get('/stats', function (req, res) {
+		console.log("here")
+	  res.sendfile(home_dir + '/app/stats/index.html');
+	});
+
 	app.post('/delete', function(req, res){
 		AM.delete(req.body.id, function(e, obj){
 			if (!e){
@@ -580,5 +586,6 @@ module.exports = function(app) {
 	//});
 	
 	app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
+
 
 };

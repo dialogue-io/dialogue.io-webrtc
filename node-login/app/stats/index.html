@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>StatsRTC metrics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">StatsRTC</a>
+          <div class="nav-collapse collapse">
+            <p class="navbar-text pull-right">
+              Logged in as <a href="#" class="navbar-link">Username</a>
+            </p>
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list" id="members">
+              <li class="nav-header">Members</li>
+              <div id="member_list"></div>
+            </ul>
+          </div><!--/.well -->
+          <div class="progress">
+            <div class="bar" style="width: 0%;"></div>
+          </div>
+            <p>getUserMedia constraints</p>
+            Min horizontal size [<span id="widthDisplay">640</span>]
+            <input type="range" id="width" min="0" max="1280" value="640"
+              onchange="showValue(this.id, this.value)">
+            <br>
+            Min vertical size [<span id="heightDisplay">480</span>]
+            <input type="range" id="height" min="0" max="1280" value="480"
+              onchange="showValue(this.id, this.value)">
+            <br>
+            FrameRate [<span id="frameRateDisplay">30</span>]
+            <input type="range" id="frameRate" min="0" max="60" value="30"
+              onchange="showValue(this.id, this.value)">
+            <hr>
+            <p>addStream constraints</p>
+            Maximum bitrate [<span id="bandwidthDisplay">1000</span>]
+            <input type="range" id="bandwidth" min="0" max="2000" value="1000"
+              onchange="showValue(this.id, this.value)">
+        </div><!--/span-->
+        <div class="span9">
+          <div class="row-fluid" id="webcam">
+            <div class="span4">
+              <video id="localVideo" autoplay="autoplay" style="-webkit-transition: opacity 2s; -webkit-transform: scale(-1, 1); opacity: 1; margin-right: 3px;" height="240px"></video>
+            </div>
+          </div><!--/row-->
+          <div class="row-fluid">
+          </div><!--/row-->
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <!--modal for login-->
+      <div id="loginModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h3 id="myModalLabel">Enter your name</h3>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="username_input" placeholder="Ironman or similar...">
+          <span class="help-block" id="username_helper"></span>
+          <input type="checkbox" id="hdcheckbox"> HD enabled?<br>
+          <br>Bandwidth: <input type="text" id="bwinput" placeholder="BW for the call, empy = default">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id='submit_modal'>Go!</button>
+        </div>
+      </div>
+
+      <hr>
+
+      <footer>
+        <h3>Stats & constraints</h3>
+        <div class="span3"><pre><span id="localConstraints"></span></pre></div>
+        <div class="span3"><pre><span id="bitrateConstraints"></span></pre></div>
+        <div class="span3"><pre><span id="stats"></span></pre></div>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src='/socket.io/socket.io.js'></script>
+    <script src="/js/stats/statsRTC.js"></script>
+    <script src="/js/stats/webRTC.js"></script>
+    <script src="/js/stats/adapter.js"></script>
+    <script>
+    function showValue(name, value) {
+      $('#'+name + 'Display').html(value);
+    }
+    </script>
+  </body>
+</html>

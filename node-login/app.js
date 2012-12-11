@@ -28,7 +28,7 @@ io.set('transports', [                     // enable all transports (optional if
 //app.use("/css", express.static(__dirname + '/css'));
 app.use("/img", express.static(__dirname + '/img'));
 app.listen(8080, function(){
- 	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+ 	console.log("Express server for stats listening on port %d in %s mode", app.address().port, app.settings.env);
 });
 app.root = __dirname;
 
@@ -42,6 +42,8 @@ global.host = 'localhost';
 
 require(__dirname+'/app/config')(app, exp);
 require(__dirname+'/app/server/router')(app);
+require(__dirname+'/app/stats/app');
+
 
 //Database access
 var RM = require(__dirname+'/app/server/modules/room-manager');

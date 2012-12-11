@@ -1,7 +1,7 @@
 $(document).ready(function(){
 	
-	var socket = io.connect('http://localhost:8000');
-	//var socket = io.connect('https://dialogue.io', {secure: true});
+	//var socket = io.connect('http://localhost:8000');
+	var socket = io.connect('http://dialogue.io:8000');
 	var me;
 	var Meeting = new Array();
 	var calls = 0;

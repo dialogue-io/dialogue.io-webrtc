@@ -51,10 +51,12 @@ $(document).ready(function(){
 		    		exists = true;
 		    	}
 		    }	
-		    if (exists != true) {
+		    if ((exists != true) && (formFields[3].val() != userUserName.value)) {
 				memberslist.push(formFields[3].val());
 				$('#memberslist-div').append('<strong>- '+formFields[3].val()+'</strong><br>');
 				console.log(memberslist);
+		    } else if (formFields[3].val() == userUserName.value) {
+		    	$('#membershelp').html('You can add yourself! You are the owner :)');	
 		    }
 		}
 	});

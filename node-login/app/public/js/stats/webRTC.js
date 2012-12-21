@@ -195,8 +195,8 @@ RTCchan = function(receiver,from,div,pass_stream){
            console.log("Creating PeerConnection.");
            createPeerConnection();
            console.log("Adding local stream.");
-           //pc.addStream(localStream, streamConstraints());
-           pc.addStream(localStream);
+           pc.addStream(localStream, streamConstraints());
+           //pc.addStream(localStream);
            started = true;
            // Caller initiates offer to peer.
            if (initiator) doCall();
@@ -376,10 +376,8 @@ RTCchan = function(receiver,from,div,pass_stream){
        if (remoteStream.videoTracks.length === 0 || remoteVideo.currentTime > 0) {
          //setStatus("");         
           setStatus('0%');
-          //Start stats for packet loss, not implemented yet
-          //doStats();
-          if (initiator == 1)
-          doDataChan();
+          //if (initiator == 1)
+          //doDataChan();
        } else {
            setStatus('90%');
            setTimeout(waitForRemoteVideo, 100);
@@ -541,10 +539,9 @@ RTCchan = function(receiver,from,div,pass_stream){
     }
 
     function streamConstraints() {
-      var constraints = {};
-      constraints.video = { mandatory: {}, optional: [] };
+      var constraints = { mandatory: {}, optional: [] };
       if ($("#bandwidth").val() != "0") {
-        constraints.video.optional[0] = { 'bandwidth' : $('#bandwidth').val() };
+        constraints.optional[0] = { 'bandwidth' : $('#bandwidth').val() };
       }
       $('#bitrateConstraints').append('<p>'+JSON.stringify(constraints, null, ' ')+'</p>');;
       return constraints;
@@ -557,21 +554,73 @@ RTCchan = function(receiver,from,div,pass_stream){
       }
 
       display("No stream");
-      if (pc.remoteStreams[0]) {
+      if (pc && pc.remoteStreams[0]) {
         if (pc.getStats) {
           display('No stats callback');
           pc.getStats(function(stats) {
-            console.log("Checking stats...");
-            console.log('Got stats' + JSON.stringify(stats));
+            console.log('Raw stats ' + stats);
+            var statsString = '';
+            var results = stats.result();
+            console.log('Raw results ' + results);
+            for (var i = 0; i < results.length; ++i) {
+              var res = results[i];
+              log(i + ': ' + JSON.stringify(res));
+              statsString += '<h3>Report ';
+              statsString += i;
+              statsString += '</h3>';
+              if (res.local) {
+                statsString += "<p>Local ";
+                statsString += dumpStats(res.local);
+              }
+              if (res.remote) {
+                statsString += "<p>Remote ";
+                statsString += dumpStats(res.remote);
+              }
+            }
+            $('#stats').append(statsString);
             display('No bitrate stats');
           });
         } else {
           display('No stats function. Use at least Chrome 24.0.1285');
         }
       } else {
-        console.log('Not connected yet');
+        log('Not connected yet');
+      }
+      // Collect some stats from the video tags.
+      if (localVideo) {
+         document.getElementById('localVideoConstraints').innerHTML=localVideo.videoWidth +
+             'x' + localVideo.videoHeight;
+      }
+      if (remoteVideo) {
+         document.getElementById('remoteVideoConstraints').innerHTML=remoteVideo.videoWidth +
+             'x' + remoteVideo.videoHeight;
       }
     }, 1000);
+
+    // Dumping a stats variable as a string.
+    // might be named toString? Harald version of stats objects
+    function dumpStats(obj) {
+      var statsString = 'Timestamp:';
+      statsString += obj.timestamp;
+      if (obj.names) {
+        log('Have names function');
+        names = obj.names();
+        for (var i = 0; i < names.length; ++i) {
+           statsString += '<br>';
+           statsString += names[i];
+           statsString += ':';
+           statsString += obj.stat(names[i]);
+        }
+      } else {
+        log('No names function');
+        if (obj.stat('audioOutputLevel')) {
+          statsString += "audioOutputLevel: ";
+          statsString += obj.stat('audioOutputLevel');
+          statsString += "<br>";
+        }
+      }
+      return statsString;
+    }
 
     //Opus part just in case we need to run performance tests
     // Set Opus as the default audio codec if it's present.

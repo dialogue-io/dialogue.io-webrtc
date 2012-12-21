@@ -1,7 +1,7 @@
 $(document).ready(function(){
 	
-	//var socket = io.connect('http://localhost:8000');
-	var socket = io.connect('http://dialogue.io:8000');
+	var socket = io.connect('http://localhost:8000');
+	//var socket = io.connect('https://dialogue.io', {secure: true});
 	var me;
 	var Meeting = new Array();
 	var calls = 0;
@@ -29,6 +29,10 @@ $(document).ready(function(){
     	        $('#widthDisplay').html('1280');
     	        $('#heightDisplay').html('720');
 		    }
+          	if ($('#bwinput').val() != "") {
+		    	$('#bandwidth').val($('#bwinput').val());
+		    	$('#bandwidthDisplay').html($('#bwinput').val());
+          	}
 		    doGetUserMedia(function(status){
 		    	if (status == true)
 			    socket.emit('participant', {username: me});

@@ -11,6 +11,9 @@ fs.exists = fs.exists || require('path').exists;
 
 
 var app = require('express').createServer();
+app.listen(8080, function(){
+ 	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+});
 var io = require('socket.io').listen(app);
 //io.enable('browser client minification');  // send minified client
 //io.enable('browser client etag');          // apply etag caching logic based on version number
@@ -27,9 +30,6 @@ io.set('transports', [                     // enable all transports (optional if
 //app.use("/js", express.static(__dirname + '/js'));
 //app.use("/css", express.static(__dirname + '/css'));
 app.use("/img", express.static(__dirname + '/img'));
-app.listen(8080, function(){
- 	console.log("Express server for stats listening on port %d in %s mode", app.address().port, app.settings.env);
-});
 app.root = __dirname;
 
 app.dynamicHelpers({
@@ -142,7 +142,8 @@ io.sockets.on('connection', function (socket) {
 			try {
 				walk(__dirname+'/room/'+info.room+'/logs/', function(err, results) {
 				  if (err) throw err;
-				  io.sockets.emit('logfiles', results);
+				  //io.sockets.emit('logfiles', results);
+				  socket.emit('logfiles',results);
 				});
 			} catch (e) {
 				console.log(e);

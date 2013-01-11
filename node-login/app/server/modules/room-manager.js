@@ -51,7 +51,7 @@ RM.create = function(newData, callback)
 					newData.features = [1,1,0,0,0];
 					newData.lastaccess = "";
 					newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
-					console.log(newData.private_room);
+					//console.log(newData.private_room);
 					if (newData.private_room == true) {
 						RM.saltAndHash(newData.token, function(hash){
 							newData.token = hash;
@@ -232,7 +232,7 @@ RM.checkToken = function(address, token, member, callback)
 			bcrypt.compare(token, o.token, function(err, res) {
 				if (res) {
 					//Token checked and user added to the room
-					console.log(member);
+					//console.log(member);
 					if (o.memberslist == null) {
 						var memberslist = [];
 						memberslist.push(member);

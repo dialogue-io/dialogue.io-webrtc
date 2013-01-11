@@ -81,6 +81,9 @@
             Maximum bitrate [<span id="bandwidthDisplay">1000</span>]
             <input type="range" id="bandwidth" min="0" max="2000" value="1000"
               onchange="showValue(this.id, this.value)">
+            <br>
+            LocalVideoConstraints: <div id="localVideoConstraints"></div>
+            RemoteVideoConstraints: <div id="remoteVideoConstraints"></div>
         </div><!--/span-->
         <div class="span9">
           <div class="row-fluid" id="webcam">
@@ -127,9 +130,9 @@
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.js"></script>
     <script src='/socket.io/socket.io.js'></script>
-    <script src="/js/stats/statsRTC.js"></script>
-    <script src="/js/stats/webRTC.js"></script>
-    <script src="/js/stats/adapter.js"></script>
+    <script src="/js/statsRTC.js"></script>
+    <script src="/js/webRTC.js"></script>
+    <script src="/js/adapter.js"></script>
     <script>
     function showValue(name, value) {
       $('#'+name + 'Display').html(value);

@@ -49,20 +49,28 @@ RM.create = function(newData, callback)
 					callback('address-taken');
 				}	else{
 					newData.features = [1,1,0,0,0];
-					RM.saltAndHash(newData.token, function(hash){
-						newData.token = hash;
-						newData.lastaccess = "";
-						newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
-					// append date stamp when record was created //
-						//if (memberslist != undefined) newData.members = [];
-					    //for (i=0; i<memberslist.split(',').length; i++) {
-					    	//newData.members.push(memberslist.split(',')[i]);
-					    //}
-					    console.log(newData.members);
-					    //console.log(memberslist);
-					    //newData.members = memberslist;
+					newData.lastaccess = "";
+					newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
+					console.log(newData.private_room);
+					if (newData.private_room == true) {
+						RM.saltAndHash(newData.token, function(hash){
+							newData.token = hash;
+						// append date stamp when record was created //
+							//if (memberslist != undefined) newData.members = [];
+						    //for (i=0; i<memberslist.split(',').length; i++) {
+						    	//newData.members.push(memberslist.split(',')[i]);
+						    //}
+						    console.log(newData.members);
+						    //console.log(memberslist);
+						    //newData.members = memberslist;
+							RM.rooms.insert(newData, callback(null));
+						});						
+					} else {
+						//No password token
+						newData.token = "";
 						RM.rooms.insert(newData, callback(null));
-					});
+					}
+
 				}
 			});
 		}
@@ -84,14 +92,20 @@ RM.update = function(newData, callback)
 		}
 		o.members   = newData.members;
 		o.logs  = newData.logs;
+		o.private_room = newData.private_room;
 		//o.owner = newData.owner;
-		if (newData.token == ''){
+		if (newData.private_room == 'true'){
+			if (newData.token == ''){
+				RM.rooms.save(o); callback(null,o);
+			} else{
+				RM.saltAndHash(newData.token, function(hash){
+					o.token = hash;
+					RM.rooms.save(o); callback(null,o);			
+				});
+			}
+		} else if(newData.private_room == 'false'){
+			newData.token = "";
 			RM.rooms.save(o); callback(null,o);
-		}	else{
-			RM.saltAndHash(newData.token, function(hash){
-				o.token = hash;
-				RM.rooms.save(o); callback(null,o);			
-			});
 		}
 		callback(e);
 	});
@@ -180,15 +194,19 @@ RM.isMember = function(address, member, callback)
 	RM.rooms.findOne({address:address}, function(e, o) {
 		if (o){
 			toggle = null;
-			if (o.members != null) {
-				for (i=0; i<o.members.length; i++) {
-					if (o.members[i] == member) {
-						toggle = true;
-						callback(true);
+			if (o.private_room == 'true') {
+				if (o.members != null) {
+					for (i=0; i<o.members.length; i++) {
+						if (o.members[i] == member) {
+							toggle = true;
+							callback(true);
+						}
 					}
 				}
+				if (toggle != true) callback(false);
+			} else {
+				callback('open');
 			}
-			if (toggle != true) callback(false);
 		}
 	});
 };

@@ -43,12 +43,17 @@ div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
 							.controls
 								input#logs-tf.checkbox(type='checkbox', name='logs')
 								span.help-block#logshelp Check to allow the creation of logfiles
-						#token-cg.control-group
-							label.control-label(for='token-tf') Access token
+						#private_room-cg.control-group
+							label.control-label(for='private_room-tf') Private room
 							.controls
-								input#token-tf.input-xlarge.disabled(type='text', name='token', placeholder='Secret word')
+								input#private_room-tf.checkbox(type='checkbox', name='private_room')
+								span.help-block#private_roomhelp If public, no access token will be required, share the URL to the users.
+						#token-cg.control-group
+							label.control-label(for='token-tf')
+							.controls
+								input#token-tf.input-xlarge.disabled(type='text', name='token', placeholder='Secret word (Optional)')
 								button(type='button')#randomtoken.btn Generate
-								span.help-block#tokenhelp This secret word has to be given to all members that will access the room
+								span.help-block#tokenhelp This secret word has to be given to the members that will access the room.
 						.form-actions
 							button(type='submit')#createroom-form-submit.btn
 								| Create

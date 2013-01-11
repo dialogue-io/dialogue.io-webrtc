@@ -15,6 +15,18 @@ $(document).ready(function(){
 	$('#address-tf').attr('disabled', true);
 	//$('#address-tf').val(randomizer(10,true));
 
+	$("#private_room-tf").click(function() {
+	    // this function will get executed every time the #private-tf element is clicked (or tab-spacebar changed)
+	    if($(this).is(":checked")) // "this" refers to the element that fired the event
+	    {
+        	$('#token-tf').attr('disabled', false);
+			$('#randomtoken').attr('disabled', false);
+	    } else {
+			$('#token-tf').attr('disabled', true);
+			$('#randomtoken').attr('disabled', true);    	
+	    }
+	});
+
 	//Generate random token for access
 	$('#randomtoken').click(function(){
 		randomstring = randomizer(8);
@@ -40,15 +52,14 @@ $(document).ready(function(){
 		return randomstring;
 	}
 
+	$("#updateroom-form-submit").click(function() {
+		$("#private_room-tf").attr("disabled", true);
+	});
 
 	$('#updateroom-form').ajaxForm({
 		beforeSubmit : function(formData, jqForm, options){
 			var e = [];
-			if (formFields[2].val().length < 6 && formFields[2].val().length != 0) {
-				controlGroups[2].addClass('error'); e.push('Invalid token, should contain 6 characters');
-				$('#tokenhelp').html('Invalid token, must contain 6 characters minimum');
-				return false;
-			} else if (formFields[0].val() == '' || formFields[0].val() == null || formFields[0].val().length < 4){
+			if (formFields[0].val() == '' || formFields[0].val() == null || formFields[0].val().length < 4){
 				controlGroups[0].addClass('error'); e.push('Invalid name, should contain 4 characters');
 				$('#namehelp').html('Invalid name, must contain 4 characters minimum');
 				return false;
@@ -56,8 +67,12 @@ $(document).ready(function(){
 				controlGroups[1].addClass('error'); e.push('Invalid url, should contain 4 characters');
 				$('#urlhelp').html('Invalid url, must contain 4 characters minimum');
 				return false;
+			} else if ($("#private_room-tf").is(":checked") && (formFields[2].val() != '' && formFields[2].val().length < 6)){
+				controlGroups[2].addClass('error'); e.push('Invalid token, should contain 6 characters');
+				$('#tokenhelp').html('Invalid token, must contain 6 characters minimum');
+				return false;
 			} else {
-				formData.push({name:'updateroom', value: userUserName.value},{name:'memberslist', value: memberslist},{name:'address', value: formFields[1].val()});
+				formData.push({name:'updateroom', value: userUserName.value},{name:'memberslist', value: memberslist},{name:'address', value: formFields[1].val()},{name:'private_room', value: $("#private_room-tf").is(":checked")});
 				return true;
 			}
 		},

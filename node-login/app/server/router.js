@@ -255,14 +255,14 @@ module.exports = function(app) {
 			req.session.destroy(function(e){ res.send('ok', 200); });
 		}	else if (req.param('createroom') != undefined){
 			//Converts the string of users to members in JSON format
-		    //console.log(req.param('memberslist'));
 			RM.create({
 				name 	: req.param('name'),
 				address 	: req.param('address'),
 				token 	: req.param('token'),
 				owner	: req.param('createroom'),
 				members : req.param('memberslist'),
-				logs	: req.param('logs')
+				logs	: req.param('logs'),
+				private_room	: req.param('private_room')
 			}, function(e, o){
 				if (e){
 					res.send(e, 400);
@@ -380,7 +380,8 @@ module.exports = function(app) {
 					token 	: req.param('token'),
 					owner	: req.param('updateroom'),
 					members : req.param('memberslist'),
-					logs	: req.param('logs')
+					logs	: req.param('logs'),
+					private_room	: req.param('private_room')
 				}, function(e, o){
 					if (e){
 						res.send(e, 400);
@@ -433,7 +434,7 @@ module.exports = function(app) {
 										room : o
 									}
 								});
-							} else {
+							} else if (status == false){
 								res.render('token', {
 									locals: {
 										title : o.name+' access - dialogue.io',
@@ -442,6 +443,15 @@ module.exports = function(app) {
 									}
 								});
 								//We need to enter the token for accessing if not members
+							} else if (status == 'open'){
+								//This is not a private room
+								res.render('room', {
+									locals: {
+										title : o.name+' room - dialogue.io',
+										udata : req.session.user,
+										room : o
+									}
+								});						
 							}
 							//res.send("token");
 						});
@@ -564,7 +574,6 @@ module.exports = function(app) {
 
 	//Stats rendering
 	app.get('/stats', function (req, res) {
-		console.log("here")
 	  res.sendfile(home_dir + '/app/stats/index.html');
 	});
 

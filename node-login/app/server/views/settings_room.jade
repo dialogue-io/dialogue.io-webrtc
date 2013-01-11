@@ -47,18 +47,36 @@ div.container(style='margin:20px; margin-top:80px;', id='home_conainer')
 								.controls
 									input#logs-tf.checkbox(type='checkbox', name='logs', checked)
 									span.help-block#logshelp Check to allow the creation of logfiles
-						- if(room.logs == 'off')
+						- if(room.logs == null)
 							#logs-cg.control-group
 								label.control-label(for='members-tf') Logfiles
 								.controls
 									input#logs-tf.checkbox(type='checkbox', name='logs', checked = false)
 									span.help-block#logshelp Check to allow the creation of logfiles						
-						#token-cg.control-group
-							label.control-label(for='token-tf') Access token
-							.controls
-								input#token-tf.input-xlarge.disabled(type='text', name='token', placeholder='Secret word')
-								button(type='button')#randomtoken.btn Generate
-								span.help-block#tokenhelp This secret word has to be given to all members that will access the room
+						- if(room.private_room == 'true')
+							#private_room-cg.control-group
+								label.control-label(for='private_room-tf') Private room
+								.controls
+									input#private_room-tf.checkbox(type='checkbox', name='private_room', checked)
+									span.help-block#private_roomhelp If public, no access token will be required, share the URL to the users.
+							#token-cg.control-group
+								label.control-label(for='token-tf')
+								.controls
+									input#token-tf.input-xlarge.enabled(type='text', name='token', placeholder='Secret word (Optional)')
+									button.enabled(type='button')#randomtoken.btn Generate
+									span.help-block#tokenhelp This secret word has to be given to the members that will access the room.
+						- if(room.private_room == 'false')
+							#private_room-cg.control-group
+								label.control-label(for='private_room-tf') Private room
+								.controls
+									input#private_room-tf.checkbox(type='checkbox', name='private_room')
+									span.help-block#private_roomhelp If public, no access token will be required, share the URL to the users.
+							#token-cg.control-group
+								label.control-label(for='token-tf')
+								.controls
+									input#token-tf.input-xlarge.disabled(disabled='true',type='text', name='token', placeholder='Secret word (Optional)')
+									button(type='button',disabled='true')#randomtoken.btn Generate
+									span.help-block#tokenhelp This secret word has to be given to the members that will access the room.
 						.form-actions
 							button(type='submit')#updateroom-form-submit.btn
 								| Update

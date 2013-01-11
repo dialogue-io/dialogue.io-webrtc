@@ -9,7 +9,10 @@ fs.exists = fs.exists || require('path').exists;
 
 
 var app = require('express').createServer();
-var io = require('socket.io').listen(app);
+app.listen(8000, function(){
+ 	console.log("Express server for stats listening on port %d in %s mode", app.address().port, app.settings.env);
+});
+var io = require('socket.io').listen(8000);
 //io.enable('browser client minification');  // send minified client
 //io.enable('browser client etag');          // apply etag caching logic based on version number
 //io.enable('browser client gzip');          // gzip the file
@@ -25,9 +28,6 @@ io.set('transports', [                     // enable all transports (optional if
 app.use("/js", express.static(__dirname + '/app/js'));
 app.use("/css", express.static(__dirname + '/app/css'));
 app.use("/img", express.static(__dirname + '/app/img'));
-app.listen(8000, function(){
- 	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
-});
 app.root = __dirname;
 
 global.host = 'localhost';

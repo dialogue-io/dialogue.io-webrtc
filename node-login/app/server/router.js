@@ -335,9 +335,10 @@ module.exports = function(app) {
 	    		} else {
 					RM.isMember(req.params.room.toLowerCase(), req.session.user.user, function(status){
 						//Not owner but member of the room
-						if (status == true) {
+						if ((status == true) || (status == "open")) {
 							res.sendfile(home_dir+'/room/'+req.params.room+'/'+req.params.option+'/'+req.params.file);
 						} else {
+							console.log("Problem loading log in "+req.params.room+" for "+req.session.user.user +" response "+status);
 					        res.redirect('/');
 						}
 					});    			

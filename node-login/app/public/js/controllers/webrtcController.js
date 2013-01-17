@@ -55,6 +55,8 @@ $(document).ready(function(){
       } else {
         //Call does not exist
         $('.groupCall').attr('disabled', true);
+        $('.groupCall').css('display', 'none');
+        $('.closeCall').css('display', 'inline');
         $('.webrtc_checkbox').attr('disabled', true);
         $('.webrtc_checkbox').each( function() {
           if($(this).val().split('@')[1].split(')')[0]==to)
@@ -85,9 +87,13 @@ $(document).ready(function(){
 
   clean = function(){
     $('.webrtc_checkbox:checked').each(function(index) {
-      $('.groupCall').attr('disabled', false);
+      $('.groupCall').attr('disabled', false);        
+      $('.groupCall').css('display', 'inline');
+      $('.closeCall').css('display', 'none');
       $('.webrtc_checkbox').attr('disabled', false);
       $('.webrtc_checkbox').attr('checked', false);
+      groupCall = {room:roomAddress.value,participants:[]};
+      calls=0;
     });      
   }
 
@@ -98,6 +104,8 @@ $(document).ready(function(){
     if (($('.webrtc_checkbox:checked').length < 4) && ($('.webrtc_checkbox:checked').length >= 1)) {
       $('.webrtc_checkbox:checked').each(function(index) {
         $('.groupCall').attr('disabled', true);
+        $('.groupCall').css('display', 'none');
+        $('.closeCall').css('display', 'inline');
         $('.webrtc_checkbox').attr('disabled', true);
         id = $(this).attr('value').split('@')[1].split(')')[0];
         console.log(id);
@@ -106,6 +114,17 @@ $(document).ready(function(){
       sendConference(groupCall);
       //console.log(JSON.stringify(groupCall.room));
     }
+  });
+
+  //Listener for calls
+  $('.closeCall').click(function(){
+    me=userUserName.value;
+    console.log("Hanging call");
+    for (var i in Meeting) {
+      Meeting[i].closeCall();
+      Meeting[i]=null;
+    }
+    clean();
   });
 
   makeCall = function(me,id) {
@@ -190,6 +209,13 @@ $(document).ready(function(){
           return false;
         }
      });
+    }
+
+    this.closeCall = function(callback){
+      sendMessage({
+        type: 'bye'
+      },receiver,from);
+      stop();
     }
 
     this.Answer = function(callback){
@@ -500,7 +526,7 @@ $(document).ready(function(){
     }
 
     function stop() {
-      setStatus("Hanging up...");
+      console.log("Hanging up...");
       remoteVideo.style.opacity = 0;
       remoteVideo.src = null;
       var _div = document.getElementById(div);
@@ -516,7 +542,13 @@ $(document).ready(function(){
     }
 
     function waitForRemoteVideo() {
-       if (remoteStream.videoTracks.length === 0 || remoteVideo.currentTime > 0) {
+        try {
+          // Try the new representation of tracks in a stream in M26.
+          videoTracks = remoteStream.getVideoTracks()
+        } catch (e) {
+          videoTracks = remoteStream.videoTracks
+        }
+       if (videoTracks.length === 0 || remoteVideo.currentTime > 0) {
          setStatus("");         
        } else {
            setTimeout(waitForRemoteVideo, 100);
@@ -559,19 +591,25 @@ $(document).ready(function(){
     }
 
     function toggleVideoMute() {
-       if (localStream.videoTracks.length === 0) {
+        try {
+          // Try the new representation of tracks in a stream in M26.
+          videoTracks = localStream.getVideoTracks()
+        } catch (e) {
+          videoTracks = localStream.videoTracks
+        }
+       if (videoTracks.length === 0) {
            console.log("No local video available.");
            return;
        }
 
        if (isVideoMuted) {
-           for (i = 0; i < localStream.videoTracks.length; i++) {
-               localStream.videoTracks[i].enabled = true;
+           for (i = 0; i < videoTracks.length; i++) {
+               videoTracks[i].enabled = true;
            }
            console.log("Video unmuted.");
        } else {
-           for (i = 0; i < localStream.videoTracks.length; i++) {
-               localStream.videoTracks[i].enabled = false;
+           for (i = 0; i < videoTracks.length; i++) {
+               videoTracks[i].enabled = false;
            }
            console.log("Video muted.");
        }
@@ -580,19 +618,25 @@ $(document).ready(function(){
     }
 
     function toggleAudioMute() {
-       if (localStream.audioTracks.length === 0) {
+        try {
+          // Try the new representation of tracks in a stream in M26.
+          audioTracks = localStream.getAudioTracks()
+        } catch (e) {
+          audioTracks = localStream.audioTracks
+        }
+       if (audioTracks.length === 0) {
            console.log("No local audio available.");
            return;
        }
 
        if (isAudioMuted) {
-           for (i = 0; i < localStream.audioTracks.length; i++) {
-               localStream.audioTracks[i].enabled = true;
+           for (i = 0; i < audioTracks.length; i++) {
+               audioTracks[i].enabled = true;
            }
            console.log("Audio unmuted.");
        } else {
-           for (i = 0; i < localStream.audioTracks.length; i++) {
-               localStream.audioTracks[i].enabled = false;
+           for (i = 0; i < audioTracks.length; i++) {
+               audioTracks[i].enabled = false;
            }
            console.log("Audio muted.");
        }

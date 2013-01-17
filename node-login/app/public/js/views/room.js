@@ -80,6 +80,8 @@ $(document).ready(function(){
 
 	socket.on('makeCall', function (id) {
         $('.groupCall').attr('disabled', true);
+        $('.groupCall').attr('display', 'none');
+        $('.closeCall').attr('display', 'inline');
         $('.webrtc_checkbox').attr('disabled', true);
         $('.webrtc_checkbox').each( function() {
         	if($(this).val().split('@')[1].split(')')[0]==id)

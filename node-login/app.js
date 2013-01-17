@@ -18,7 +18,7 @@ var io = require('socket.io').listen(app);
 //io.enable('browser client minification');  // send minified client
 //io.enable('browser client etag');          // apply etag caching logic based on version number
 //io.enable('browser client gzip');          // gzip the file
-io.set('log level', 1);                    // reduce logging just production!!!!!
+//io.set('log level', 1);                    // reduce logging just production!!!!!
 io.set('transports', [                     // enable all transports (optional if you want flashsocket)
     'websocket'
   , 'flashsocket'
@@ -129,7 +129,7 @@ io.sockets.on('connection', function (socket) {
 						var input = fs.createReadStream(__dirname+'/room/'+socket.room+'/logs/'+date.toDateString()+'.html');
 						var file = true;
 						function func(data) {
-							console.log(data.split('</strong>')[1]);
+							//console.log(data.split('</strong>')[1]);
 							socket.emit('updatechat',data.split('<strong>')[1].split(':</strong>')[0] , data.split(']:</strong>')[1],'true');
 						}
 						readLines(input, func);
@@ -184,9 +184,9 @@ io.sockets.on('connection', function (socket) {
 	//Handling signalling messages
 	socket.on('signaling', function (message,receiver,from,room) {
 		// we tell the client to execute 'updatechat' with 2 parameters
-		console.log("Signaling message to: "+receiver+room);
+		//console.log("Signaling message to: "+receiver+room);
 		to_id = ids[receiver+room];
-		console.log(ids);
+		//console.log(ids);
 		//console.log("Message: "+message.data);
 		//socket_to = sockets[to_id];
 		io.sockets.socket(ids[receiver+room]).emit('onSignaling',message,from,receiver);

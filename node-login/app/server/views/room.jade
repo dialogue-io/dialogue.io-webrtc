@@ -60,7 +60,8 @@ head
           table.table-condensed
             tbody#users-body
           - if (room.features[1] == 1)
-            button.btn.btn-small.btn-primary(type='button', class="groupCall") Group call
+            button.btn.btn-small.btn-primary(type='button', class="groupCall", style="display:inline") Group call
+            button.btn.btn-small.btn-primary(type='button', class="closeCall", style="display:none") Hang
           - if (room.logs == 'on')
             h2 Logs
             #logfiles

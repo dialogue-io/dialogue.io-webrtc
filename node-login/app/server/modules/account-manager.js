@@ -81,6 +81,7 @@ AM.signup = function(newData, callback)
 				}	else{
 					AM.saltAndHash(newData.pass, function(hash){
 						newData.pass = hash;
+						newData.lastVisited = null;
 					// append date stamp when record was created //	
 						newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
 						AM.accounts.insert(newData, callback(null));
@@ -177,8 +178,7 @@ AM.delAllRecords = function(id, callback)
 
 // just for testing - these are not actually being used //
 
-AM.findById = function(id, callback) 
-{
+AM.findById = function(id, callback) {
 	AM.accounts.findOne({_id: this.getObjectId(id)}, 
 		function(e, res) {
 		if (e) callback(e)
@@ -186,6 +186,13 @@ AM.findById = function(id, callback)
 	});
 };
 
+/*AM.findByUser = function(id, callback) {
+	AM.accounts.findOne({_id: this.getObjectId(id)}, 
+		function(e, res) {
+		if (e) callback(e)
+		else callback(null, res)
+	});
+};*/
 
 AM.findByMultipleFields = function(a, callback)
 {
@@ -194,5 +201,45 @@ AM.findByMultipleFields = function(a, callback)
 	    function(e, results) {
 		if (e) callback(e)
 		else callback(null, results)
+	});
+}
+
+AM.lastVisited = function(room, user, callback) {
+// this takes an array of name/val pairs to search against {fieldName : 'value'} //
+	//console.log(room._id +' '+ user);
+	AM.accounts.findOne({user: user}, function(e, o) {
+		if (e) {
+			console.log(e);
+			callback(null);
+		} else if(o) {
+			if ((o.lastVisited == null) || (typeof o.lastVisited == 'undefined')) {
+				if ((room._id.toString() != null) && (room != '')) {
+					var lastVisited = [];
+					lastVisited.unshift(room);
+					o.lastVisited = lastVisited;
+					AM.accounts.save(o); callback(o);
+				}
+			} else {
+				//Total lastVisited rooms set to 5, if not, delete
+				//also check if the room is already in lastVisited array to avoid duplicates
+				//console.log(room._id.toString());
+				if (o.lastVisited.indexOf(room) == -1) {
+					if (o.lastVisited.length < 5) {
+						if ((room != null) && (room != ''))
+						o.lastVisited.unshift(room);
+					} else {
+						if ((room != null) && (room != '')) {
+							o.lastVisited.pop();
+							o.lastVisited.unshift(room);
+						}
+					}
+					AM.accounts.save(o); 
+				}
+				callback(o);
+			}
+		} else {
+			console.log('Error '+o);
+			callback(null);
+		}
 	});
 }

@@ -110,6 +110,11 @@ $(document).ready(function(){
         id = $(this).attr('value').split('@')[1].split(')')[0];
         console.log(id);
         makeCall(me,id);
+        mixpanel.track('Group call', {
+            'page name': document.title,
+            'url': window.location.pathname,
+            'user': userUserName.value
+        });
       });
       sendConference(groupCall);
       //console.log(JSON.stringify(groupCall.room));

@@ -189,6 +189,18 @@ RM.findByAddress = function(address, callback)
 	});
 };
 
+RM.findById = function(id, callback) 
+{
+	RM.rooms.findOne({_id:this.getObjectId(id)}, function(e, o) {
+		if (o){
+			callback(o);
+		} else {
+			console.log(e);
+			callback(null);
+		}
+	});
+};
+
 RM.isMember = function(address, member, callback) 
 {
 	RM.rooms.findOne({address:address}, function(e, o) {

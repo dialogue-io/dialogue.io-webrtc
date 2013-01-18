@@ -18,6 +18,12 @@ div(id='home_container')
 			- for (var i = 0; i < rooms.length; i++)
 				a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name} 
 				br
+		- if ((typeof(udata.lastVisited) != 'undefined') && (udata.lastVisited.length>0))
+			h4 Recently visited
+			p
+				- for (var i = 0; i < udata.lastVisited.length; i++)
+					a(href="/room/#{udata.lastVisited[i].address}", class='lastVisited', id="#{udata.lastVisited[i].address}") #{udata.lastVisited[i].name}	
+					br
 		hr
 		<i class="icon-wrench"></i> You own those rooms
 

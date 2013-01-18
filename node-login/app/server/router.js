@@ -151,15 +151,17 @@ module.exports = function(app) {
 					roomlistowned = roomlist;
 					roomlist='';
 					RM.findByMember(req.session.user.user,function(e,roomlist){
-						res.render('home', {
-							locals: {
-								title : 'dialogue.io',
-								countries : CT,
-								udata : req.session.user,
-								rooms : roomlist,
-								roomsowned : roomlistowned
-							}
-						});
+						AM.findById(req.session.user._id,function(e,user){
+							res.render('home', {
+								locals: {
+									title : 'dialogue.io',
+									countries : CT,
+									udata : user,
+									rooms : roomlist,
+									roomsowned : roomlistowned
+								}
+							});									
+						})
 					});
 				});
 			} else {
@@ -168,15 +170,17 @@ module.exports = function(app) {
 					roomlistowned = roomlist;
 					roomlist='';
 					RM.findByMember(req.session.user.user,function(e,roomlist){
-						res.render('home', {
-							locals: {
-								title : 'dialogue.io',
-								countries : CT,
-								udata : req.session.user,
-								rooms : roomlist,
-								roomsowned : roomlistowned
-							}
-						});
+						AM.findById(req.session.user._id,function(e,user){
+							res.render('home', {
+								locals: {
+									title : 'dialogue.io',
+									countries : CT,
+									udata : user,
+									rooms : roomlist,
+									roomsowned : roomlistowned
+								}
+							});									
+						})
 					});
 				});
 			}
@@ -446,13 +450,28 @@ module.exports = function(app) {
 								//We need to enter the token for accessing if not members
 							} else if (status == 'open'){
 								//This is not a private room
-								res.render('room', {
-									locals: {
-										title : o.name+' room - dialogue.io',
-										udata : req.session.user,
-										room : o
+								RM.getAddress(req.params.room.toLowerCase(),function(room){
+									if (room != null) {
+										//id = RM.getObjectId(room._id);
+										AM.lastVisited(room,req.session.user.user,function(status){
+											if(status != null) {
+												res.render('room', {
+													locals: {
+														title : o.name+' room - dialogue.io',
+														udata : req.session.user,
+														room : o
+													}
+												});	
+											} else {
+												res.redirect('/');
+											}							
+										});
+									} else {
+										console.log("Error room "+req.params.room+" not found");
+										res.redirect('/');
 									}
-								});						
+
+								})
 							}
 							//res.send("token");
 						});

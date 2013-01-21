@@ -12,22 +12,26 @@ div(id='home_container')
 		p#sub1.subheading Please tell us a little about yourself.
 		hr
 		p
-			h4 Owned
-			- for (var i = 0; i < roomsowned.length; i++)
-				a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name}	
-				br
-			hr
-			h4 Private
-			- for (var i = 0; i < rooms.length; i++)
-				a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name} 
-				br
-			hr
-		- if ((typeof(udata.lastVisited) != 'undefined') && (udata.lastVisited.length>0))
-			h4 Recently visited
-			p
-				- for (var i = 0; i < udata.lastVisited.length; i++)
-					a(href="/room/#{udata.lastVisited[i].address}", class='lastVisited', id="#{udata.lastVisited[i].address}") #{udata.lastVisited[i].name}	
+			- if (roomsowned.length > 0)
+				h4 Owned
+				- for (var i = 0; i < roomsowned.length; i++)
+					a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name}	
 					br
+				hr
+			- if (rooms.length > 0)
+				h4 Private
+				- for (var i = 0; i < rooms.length; i++)
+					a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name} 
+					br
+				hr
+		- if (typeof(udata.lastVisited) != 'undefined')
+			-if (udata.lastVisited != null)
+				- if (udata.lastVisited.length>0)
+					h4 Recently visited
+					p
+						- for (var i = 0; i < udata.lastVisited.length; i++)
+							a(href="/room/#{udata.lastVisited[i].address}", class='lastVisited', id="#{udata.lastVisited[i].address}") #{udata.lastVisited[i].name}	
+							br
 
 
 // display form errors in a custom modal window //

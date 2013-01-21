@@ -3,29 +3,31 @@ div(id='home_container')
 	pre.
 		News
 		----
-		16/01/2012 Solved log bugs updated API
+		18/01/2012 Last visited rooms
 		17/01/2012 Added hang button
+		16/01/2012 Solved log bugs updated API
 #account-form-container
 	#home-form.form-horizontal.well.span6
 		h1
 		p#sub1.subheading Please tell us a little about yourself.
 		hr
 		p
+			h4 Owned
 			- for (var i = 0; i < roomsowned.length; i++)
 				a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name}	
-				<i class="icon-wrench"></i> 
 				br
+			hr
+			h4 Private
 			- for (var i = 0; i < rooms.length; i++)
 				a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name} 
 				br
+			hr
 		- if ((typeof(udata.lastVisited) != 'undefined') && (udata.lastVisited.length>0))
 			h4 Recently visited
 			p
 				- for (var i = 0; i < udata.lastVisited.length; i++)
 					a(href="/room/#{udata.lastVisited[i].address}", class='lastVisited', id="#{udata.lastVisited[i].address}") #{udata.lastVisited[i].name}	
 					br
-		hr
-		<i class="icon-wrench"></i> You own those rooms
 
 
 // display form errors in a custom modal window //

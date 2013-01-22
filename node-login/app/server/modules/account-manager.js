@@ -224,6 +224,7 @@ AM.lastVisited = function(room, user, callback) {
 				//also check if the room is already in lastVisited array to avoid duplicates
 				//console.log(room._id.toString());
 				if (o.lastVisited.indexOf(room) == -1) {
+					//console.log('it does not exist');
 					if (o.lastVisited.length < 5) {
 						if ((room != null) && (room != ''))
 						o.lastVisited.unshift(room);

@@ -15,6 +15,7 @@ $(document).ready(function(){
 			}
 		},
 		success	: function(responseText, status, xhr, $form){
+			//console.log(status);
 			if (status == 'success') hc.onUpdateSuccess();
 		},
 		error : function(e){

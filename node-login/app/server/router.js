@@ -17,12 +17,13 @@ module.exports = function(app) {
 // main login page //
 
 	app.get('/', function(req, res){
-	console.log('login', req.cookies.user, req.cookies.pass);		
+		//console.log(req);		
 	// check if the user's credentials are saved in a cookie //
 		if (req.cookies.user == undefined || req.cookies.pass == undefined){
 			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
 		}	else{
 	// attempt automatic login //
+			console.log('login', req.cookies.user, req.cookies.pass);
 			AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
 				if (o != null){
 				    req.session.user = o;
@@ -66,7 +67,7 @@ module.exports = function(app) {
 	app.get('/admin', function(req, res) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.redirect('/');
 	    }   else{
 			console.log('Admin entering: '+req.session.user.email+' '+req.session.user.admin);
 			if (req.session.user.admin == "true") {
@@ -94,13 +95,7 @@ module.exports = function(app) {
 	// check if the user's credentials are saved in a cookie //
 		if (req.session.user.admin == "true") {
 			if (req.param('user') != undefined) {
-				AM.update({
-					user 		: req.param('user'),
-					name 		: req.param('name'),
-					email 		: req.param('email'),
-					country 	: req.param('country'),
-					pass		: req.param('pass')
-				}, function(o){
+				AM.manualLogin(req.param('user'),req.param('pass'), function(e,o){
 					if (o){
 						req.session.user = o;
 				// udpate the user's login cookies if they exists //
@@ -142,7 +137,8 @@ module.exports = function(app) {
 	app.get('/home', function(req, res) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.redirect('/');
+			//res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
 	    }   else{
 	    	roomlistowned = '';
 			if (req.session.user.admin == "true") {
@@ -189,13 +185,7 @@ module.exports = function(app) {
 	
 	app.post('/home', function(req, res){
 		if (req.param('user') != undefined) {
-			AM.update({
-				user 		: req.param('user'),
-				name 		: req.param('name'),
-				email 		: req.param('email'),
-				country 	: req.param('country'),
-				pass		: req.param('pass')
-			}, function(o){
+			AM.manualLogin(req.param('user'),req.param('pass'), function(e,o){
 				if (o){
 					req.session.user = o;
 			// udpate the user's login cookies if they exists //
@@ -220,7 +210,7 @@ module.exports = function(app) {
 	app.get('/createroom', function(req, res) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
 	    }   else{
 			res.render('createroom', {
 				locals: {
@@ -234,13 +224,7 @@ module.exports = function(app) {
 	
 	app.post('/createroom', function(req, res){
 		if (req.param('user') != undefined) {
-			AM.update({
-				user 		: req.param('user'),
-				name 		: req.param('name'),
-				email 		: req.param('email'),
-				country 	: req.param('country'),
-				pass		: req.param('pass')
-			}, function(o){
+			AM.manualLogin(req.param('user'),req.param('pass'), function(e,o){
 				if (o){
 					req.session.user = o;
 			// udpate the user's login cookies if they exists //
@@ -285,7 +269,7 @@ module.exports = function(app) {
 	app.get('/settings', function(req, res) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
 	    }   else{
 		res.render('settings', {
 			locals: {
@@ -307,18 +291,25 @@ module.exports = function(app) {
 	      );
 	   } else{
 	   // attempt automatic login //
-	      AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
-		 if (o != null){
-		    req.session.user = o;
-		    res.redirect('/settings');
-		 }  else{
-		    res.render('login', 
-		       { locals: 
-			  { title: 'Hello - Please Login To Your Account' }
-		       }
-		    );
-		 }
-	      });
+			AM.update({
+				user 		: req.param('user'),
+				name 		: req.param('name'),
+				email 		: req.param('email'),
+				country 	: req.param('country'),
+				pass		: req.param('pass')
+			}, function(o){
+				if (o){
+					req.session.user = o;
+			// udpate the user's login cookies if they exists //
+					if (req.cookies.user != undefined && req.cookies.pass != undefined){
+						res.cookie('user', o.user, { maxAge: 900000 });
+						res.cookie('pass', o.pass, { maxAge: 900000 });	
+					}
+					res.send('ok', 200);
+				}	else{
+					res.send('error-updating-account', 400);
+				}
+			});
 	   }
 	});
 
@@ -329,7 +320,7 @@ module.exports = function(app) {
 	app.get('/room/:room/:option/:file'  , function(req, res) {
 		if (req.session.user == null){
 			// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
         } else if (req.params.option == 'logs') {
         	//Check if user is member of the room, if not redirect to homepage and prohibit to access logfile
 		//console.log("searching for file in "+require('path').dirname(require.main.filename));
@@ -354,7 +345,7 @@ module.exports = function(app) {
 	app.get('/room/:room/:option'  , function(req, res) {
 		if (req.session.user == null){
 			// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
         } else if (req.params.option == 'settings') {
 	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
 	    		if (o.owner == req.session.user.user) {
@@ -375,7 +366,7 @@ module.exports = function(app) {
 	app.post('/room/:room/:option'  , function(req, res) {
 		if (req.session.user == null){
 			// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
         } else if (req.params.option == 'settings') {
 	        if (req.param('updateroom') != undefined){
 				//Converts the string of users to members in JSON format
@@ -414,8 +405,7 @@ module.exports = function(app) {
 
 	app.get('/room/:room', function(req, res) {
 		if (req.session.user == null){
-	// if user is not logged-in redirect back to login page //
-	        res.redirect('/');
+			res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
 	    } else {
 	    	//Checks URL and saves the name of room in req.params[0]
 	    	RM.findByAddress(req.params.room.toLowerCase(),function(e,o){
@@ -486,13 +476,7 @@ module.exports = function(app) {
 	app.post('/room/:rooms', function(req, res){
 	// check if the user's credentials are saved in a cookie //
 		if (req.param('user') != undefined) {
-			AM.update({
-				user 		: req.param('user'),
-				name 		: req.param('name'),
-				email 		: req.param('email'),
-				country 	: req.param('country'),
-				pass		: req.param('pass')
-			}, function(o){
+			AM.manualLogin(req.param('user'),req.param('pass'), function(e,o){
 				if (o){
 					req.session.user = o;
 			// udpate the user's login cookies if they exists //

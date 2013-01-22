@@ -58,8 +58,8 @@ function settingsController()
 		//console.log("settings");
 		var that = this;
 		$.ajax({
-			url: "/settings",
-			type: "GET",
+			url: "/home",
+			type: "POST",
 			data: { id: $('#userId').val()},
 			success: function(data){
 				$('#room_container').hide();
@@ -83,12 +83,14 @@ function settingsController()
 
 settingsController.prototype.onUpdateSuccess = function()
 {
-	console.log("here");
-	$('.modal-alert').modal({ show : false, keyboard : true, backdrop : true });				
+	$('.modal-alert').modal({ show : false, keyboard : false, backdrop : 'static' });				
 	$('.modal-alert .modal-header h3').text('Success!');
 	$('.modal-alert .modal-body p').html('Your account has been updated.'); 				
 	$('.modal-alert').modal('show');
 	$('.modal-alert button').off('click');
 	$('#body_html').html('');
-	window.location="/home";
+	console.log("done");
+	$('.modal-alert button').click(function(){window.location.href = '/';})
+	//setTimeout(function(){window.location.href = '/';}, 3000);
+	window.location="/";
 }

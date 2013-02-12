@@ -6,7 +6,7 @@ module.exports = function(app, exp) {
 		app.set('view engine', 'jade');
 		app.set('view options', { doctype : 'html', pretty : true });
 		app.use(exp.bodyParser());
-		app.use(exp.cookieParser());
+		//app.use(exp.cookieParser());
 		app.use(exp.session({ secret: 'super-duper-secret-secret' }));
 		app.use(exp.csrf());
 		app.use(exp.methodOverride());

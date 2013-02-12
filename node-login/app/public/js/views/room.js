@@ -56,8 +56,8 @@ $(document).ready(function(){
     	
 	//Deppending on the feature array of bits we will deliver different features, chat, webrtc, datachan etc
 	//Starting chat code
-	//var socket = io.connect('http://localhost:8080');
-	var socket = io.connect('https://dialogue.io', {secure: true});
+	var socket = io.connect('http://localhost:8080');
+	//var socket = io.connect('https://dialogue.io', {secure: true});
 	var me;
 	//var Meeting = new Array();
 	var index = {};

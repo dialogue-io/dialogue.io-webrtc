@@ -35,6 +35,8 @@ AM.autoLogin = function(user, pass, callback)
 	AM.accounts.findOne({user:user}, function(e, o) {
 		if (o){
 			if (o.pass == pass) {
+				//date = new Date();
+				//o.lastdate = date.getTime();
 				o.lastdate = moment().format('MMMM Do YYYY, h:mm:ss a');
 				AM.accounts.save(o);
 				callback(o);
@@ -56,6 +58,8 @@ AM.manualLogin = function(user, pass, callback)
 		}	else{
 			bcrypt.compare(pass, o.pass, function(err, res) {
 				if (res){
+					//date = new Date();
+					//o.lastdate = date.getTime();
 					o.lastdate = moment().format('MMMM Do YYYY, h:mm:ss a');
 					AM.accounts.save(o);
 					callback(null, o);
@@ -105,6 +109,17 @@ AM.update = function(newData, callback)
 				o.pass = hash;
 				AM.accounts.save(o); callback(o);			
 			});
+		}
+	});
+}
+
+AM.lastVisit = function(newData) {
+	AM.accounts.findOne({user:newData.user}, function(e, o) {
+		if (o){
+			date = new Date();
+			o.lastdateaccessed = date.getTime();
+			//o.lastdate = moment().format('MMMM Do YYYY, h:mm:ss a');
+			AM.accounts.save(o);
 		}
 	});
 }

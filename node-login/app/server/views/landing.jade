@@ -16,13 +16,17 @@ div(id='home_container')
 			- if (roomsowned.length > 0)
 				h4 Owned
 				- for (var i = 0; i < roomsowned.length; i++)
-					a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name}	
+					a(href="/room/#{roomsowned[i].address}", class='room owned', id="#{roomsowned[i].address}") #{roomsowned[i].name}
+					- if (roomsowned[i].lastmessage > udata.lastdateaccessed)
+						i.icon-flag
 					br
 				hr
 			- if (rooms.length > 0)
 				h4 Private
 				- for (var i = 0; i < rooms.length; i++)
-					a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name} 
+					a(href="/room/#{rooms[i].address}", class="room", id="#{rooms[i].address}") #{rooms[i].name}
+					- if (rooms[i].lastmessage > udata.lastdateaccessed)
+						i.icon-flag 
 					br
 				hr
 		- if (typeof(udata.lastVisited) != 'undefined')
@@ -31,7 +35,9 @@ div(id='home_container')
 					h4 Recently visited
 					p
 						- for (var i = 0; i < udata.lastVisited.length; i++)
-							a(href="/room/#{udata.lastVisited[i].address}", class='lastVisited', id="#{udata.lastVisited[i].address}") #{udata.lastVisited[i].name}	
+							a(href="/room/#{udata.lastVisited[i].address}", class='lastVisited', id="#{udata.lastVisited[i].address}") #{udata.lastVisited[i].name}
+							- if (udata.lastVisited[i].lastmessage > udata.lastdateaccessed)
+								i.icon-flag	
 							br
 
 

@@ -181,6 +181,8 @@ RM.findByAddress = function(address, callback)
 	RM.rooms.findOne({address:address}, function(e, o) {
 		if (o){
 			o.lastaccess = moment().format('MMMM Do YYYY, h:mm:ss a');
+			//date = new Date();
+			//o.lastaccess = date.getTime();
 			RM.rooms.save(o);
 			callback(null,o);
 		} else {
@@ -233,6 +235,18 @@ RM.checkLogs = function(address, callback)
 		}
 	});
 };
+
+RM.lastMessage = function(address, date) 
+{
+	RM.rooms.findOne({address:address}, function(e, o) {
+		if (o) {
+			o.lastmessage = date.getTime();
+			//o.lastmessage = moment().format('MMMM Do YYYY, h:mm:ss a');
+			RM.rooms.save(o);
+		}
+	});
+};
+
 
 RM.checkToken = function(address, token, member, callback) 
 {	

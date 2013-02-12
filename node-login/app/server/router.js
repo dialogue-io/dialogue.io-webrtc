@@ -27,6 +27,7 @@ module.exports = function(app) {
 			AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
 				if (o != null){
 				    req.session.user = o;
+				    AM.lastVisit(o);
 					res.redirect('/home');
 				}	else{
 					res.render('login', { locals: { title: 'Hello - Please Login To Your Account'}});
@@ -51,10 +52,16 @@ module.exports = function(app) {
 				if (!o){
 					res.send(e, 400);
 				}	else{
+					AM.lastVisit(o);
 				    req.session.user = o;
 					if (req.param('remember-me') == 'true'){
-						res.cookie('user', o.user, { maxAge: 900000 });
-						res.cookie('pass', o.pass, { maxAge: 900000 });
+						console.log("here");
+						//2 weeks expiration for cookies
+						var hour = 3600000
+						res.cookie('user', o.user, { maxAge: 14 * 24 * hour });
+						res.cookie('pass', o.pass, { maxAge: 14 * 24 * hour });
+						//res.cookie('user', o.user);
+						//res.cookie('pass', o.pass);
 					}			
 					res.send(o, 200);
 				}
@@ -157,7 +164,7 @@ module.exports = function(app) {
 									roomsowned : roomlistowned
 								}
 							});									
-						})
+						});
 					});
 				});
 			} else {
@@ -175,8 +182,8 @@ module.exports = function(app) {
 									rooms : roomlist,
 									roomsowned : roomlistowned
 								}
-							});									
-						})
+							});										
+						});
 					});
 				});
 			}

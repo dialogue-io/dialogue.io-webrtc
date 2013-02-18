@@ -3,10 +3,6 @@ var bcrypt = require('bcrypt')
 var Db = require('mongodb').Db;
 var Server = require('mongodb').Server;
 
-//var dbPort = 27017;
-//var dbHost = global.host;
-//var dbName = 'login-testing';
-
 var dbPort = 10000;
 var dbHost = 'alex.mongohq.com';
 var dbName = 'Dialoguedb';
@@ -135,7 +131,7 @@ AM.updateAdmin = function(newData, callback)
 
 AM.setPassword = function(oldp, newp, callback)
 {
-	AM.accounts.findOne({pass:oldp}, function(e, o){
+	AM.accounts.findOne({user:newData.user}, function(e, o){
 		AM.saltAndHash(newp, function(hash){
 			o.pass = hash;
 			AM.accounts.save(o); callback(o);

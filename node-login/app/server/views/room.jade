@@ -15,7 +15,7 @@ input(type='hidden', value= room._id)#roomId
 
 script(type='text/javascript', src='/js/jquery.js')
 script(type='text/javascript', src='/js/jquery.titlealert.js')
-script(type='text/javascript')
+script(type='text/javascript').
     //console.log(userRId);
     //console.log(user.name);
     mixpanel.track('Room', {'page name' : document.title, 'url' : window.location.pathname, 'usr' : userName.value});
@@ -25,7 +25,7 @@ html(lang='en', style='height: 100%;')
 head
     link(href='/css/bootstrap.css', rel='stylesheet')
     link(href='/css/jquery.shiftenter.css', rel='stylesheet')
-    style
+    style.
       body {
       padding-top: 10px;
       height: 90%;
@@ -51,7 +51,7 @@ head
       box-shadow: inset 0 3px 4px #888;
       }
       #logfiles{}
-    script(type='text/javascript', src='/socket.io/socket.io.js')
+    script(type='text/javascript', src='/socket.io/socket.io.js').
   body
     .container-fluid(style='height: 85%; margin-top:30px;', id='room_container')
       .row-fluid(style='height: 90%;')
@@ -59,13 +59,13 @@ head
           h2 Users
           table.table-condensed
             tbody#users-body
-          - if (room.features[1] == 1)
+          - if (room.features[1] == '1')
             button.btn.btn-small.btn-primary(type='button', class="groupCall", style="display:inline") Group call
             button.btn.btn-small.btn-primary(type='button', class="closeCall", style="display:none") Hang
           - if (room.logs == 'on')
             h2 Logs
             #logfiles
-            script(type='text/javascript')
+            script(type='text/javascript').
               mixpanel.track_links('#logfiles a', 'Logfile opened');
         #chatspan.span9(style='height: 100%;')
           #chat(style='height: 80%; overflow: auto; overflow-x: hidden; margin: 2%; border: 1px solid #CCC; border-radius: 5px; background-color: white;')
@@ -111,11 +111,11 @@ head
 script(type='text/javascript', src='/js/bootstrap.js')
 include modals/alert
 include modals/confirm
-script(src='/js/views/jquery.shiftenter.js')
+script(src='/js/views/jquery.shiftenter.js').
 - if (room.features[0] == 1)
-  script(src='/js/views/room.js')
-  script(src='/js/controllers/roomController.js')
-  script(src='/js/controllers/chatController.js')
+  script(src='/js/views/room.js').
+  script(src='/js/controllers/roomController.js').
+  script(src='/js/controllers/chatController.js').
 - if (room.features[1] == 1)
-  script(src='/js/controllers/webrtcController.js')
-script(src='/js/views/showdown.js')
+  script(src='/js/controllers/webrtcController.js').
+script(src='/js/views/showdown.js').

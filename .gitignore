@@ -1,6 +1,8 @@
 
 #### Output generated from https://github.com/vr000m/gitignore
 
+.js~
+
 #### Node.gitignore
 
 lib-cov

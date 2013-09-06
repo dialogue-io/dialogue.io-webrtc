@@ -13,7 +13,7 @@
     "dependencies": {
         "express": "2.5.8",
         "stylus": ">= 0.0.1",
-        "jade": ">= 0.0.1",
+        "jade": "0.27.2",
         "bcrypt": ">=0.5.0",        
         "mongodb": ">= 0.1.0",
         "moment" : ">=1.6.2",        

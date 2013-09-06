@@ -12,7 +12,7 @@ fs.exists = fs.exists || require('path').exists;
 
 var app = require('express').createServer();
 app.use(exp.cookieParser());
-app.listen(8080, function(){
+app.listen(8088, function(){
  	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
 var io = require('socket.io').listen(app);
